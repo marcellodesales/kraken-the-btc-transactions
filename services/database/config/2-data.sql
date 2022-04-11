@@ -1,4 +1,5 @@
 -- Initial users and wallets https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/docs/Requirements-Analysis.md#-known-customers
+-- Insert last value: https://stackoverflow.com/questions/6560447/can-i-use-return-value-of-insert-returning-in-another-insert/6560530#6560530
 
 -- Wesley Crusher 	mvd6qFeVkqH6MNAS2Y2cLifbdaX5XUkbZJ
 INSERT
