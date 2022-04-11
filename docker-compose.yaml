@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    container_name: bitcoin-transactions-postgres
+    container_name: bitcoin-transactions-postgres-dev-server
     image: debezium/postgres:14-alpine
     user: postgres
     environment:
