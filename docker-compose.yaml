@@ -1,0 +1,32 @@
+version: "3.9"
+
+networks:
+  blockchain-bitcoin:
+    name: blockchain-bitcoin-net
+
+services:
+
+  postgres:
+    container_name: bitcoin-transactions-postgres
+    image: debezium/postgres:14-alpine
+    user: postgres
+    environment:
+      POSTGRES_DB: bitcoin-transactions         # PostgreSQL database
+      POSTGRES_USER: postgres                   # PostgreSQL user
+      POSTGRES_PASSWORD: postgres               # PostgreSQL password
+    ports:
+      - 5432:5432
+    volumes:
+      - ./services/database/config:/docker-entrypoint-initdb.d
+      - ./services/database/data:/var/lib/my_data
+    networks:
+      - blockchain-bitcoin
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
