@@ -1,0 +1,40 @@
+version: "3.9"
+
+networks:
+  blockchain-bitcoin-net:
+    external: true
+
+services:
+
+  kraken-btc-data-watcher-build:
+    image: marcellodesales/kraken-blockchain-btc-transactions-file-watcher-build
+    build:
+      context: . # services/reporter-api
+      target: builder
+
+  kraken-btc-data-watcher-runtime:
+    image: marcellodesales/kraken-blockchain-btc-transactions-file-watcher
+    container_name: kraken-btc-data-watcher
+    build:
+      context: . # services/reporter-api
+      cache_from:
+        - marcellodesales/kraken-blockchain-btc-transactions-file-watcher-build
+    # Expose ports [HOST:CONTAINER}
+    ports:
+      - "4000:4000"
+
+    # Overwrite any env var defined in .env file (if required)
+    environment:
+      KRAKEN_MICROSERVICE: data-watcher
+      NODE_ENV: development
+      PORT: 4000
+      API_VERSION: 1.0.0
+      JWT_SECRET: helloworld
+
+    networks:
+      - blockchain-bitcoin-net
+
+#    depends_on:
+#      postgres:
+#        condition: service_healthy
+
