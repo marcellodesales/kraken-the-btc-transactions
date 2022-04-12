@@ -1,0 +1,24 @@
+version: '3'
+
+networks:
+  blockchain-bitcoin-net:
+    external: true
+
+services:
+
+  ####
+  #### BUILD: docker-compose build cloudbeaver-frontend
+  #### VERIFY: docker run -ti marcellodesales/cloudbeaver-frontend find /dbeaver/cloud/frontend -name "@cloudbeaver"
+  ####
+  cloudbeaver:
+    image: ghcr.io/marcellodesales/cloudbeaver:master-7258fc8
+    container_name: cloudbeaver-server
+    labels:
+      com.github.marcellodesales.type: runtime
+    networks:
+      - blockchain-bitcoin-net
+    ports:
+      - 8978:8978
+    volumes:
+      - ./tools/cloudbeaver/data/logs:/opt/cloudbeaver/logs
+      - ./tools/cloudbeaver/workspace:/opt/cloudbeaver/workspace

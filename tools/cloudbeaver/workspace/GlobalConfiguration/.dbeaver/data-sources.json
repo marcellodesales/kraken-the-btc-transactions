@@ -1,0 +1,32 @@
+{
+	"folders": {},
+	"connections": {
+		"postgres-bitcoin-transactions": {
+			"provider": "postgresql",
+			"driver": "postgres-jdbc",
+			"name": "bitcoin-transactions-database-dev",
+			"save-password": false,
+			"show-system-objects": true,
+			"read-only": false,
+			"configuration": {
+				"host": "bitcoin-transactions-postgres-dev-server",
+				"port": "5432",
+				"database": "bitcoin-transactions",
+				"url": "jdbc:postgresql://bitcoin-transactions-postgres-dev-server:5432/bitcoin-transactions",
+				"type": "dev",
+				"auth-model": "native"
+			}
+		}
+	},
+	"connection-types": {
+		"dev": {
+			"name": "Development",
+			"color": "255,255,255",
+			"description": "Regular development database",
+			"auto-commit": true,
+			"confirm-execute": false,
+			"confirm-data-change": false,
+			"auto-close-transactions": false
+		}
+	}
+}
