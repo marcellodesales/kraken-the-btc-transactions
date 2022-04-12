@@ -8,3 +8,6 @@ GRANT api_anon TO authenticator;
 -- https://dba.stackexchange.com/questions/33943/granting-access-to-all-tables-for-a-user
 GRANT ALL on SCHEMA bitcoin to api_anon;
 GRANT ALL ON ALL TABLES IN SCHEMA bitcoin TO api_anon;
+
+-- https://dba.stackexchange.com/questions/33943/granting-access-to-all-tables-for-a-user/33960#33960
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA bitcoin TO api_anon;
