@@ -16,7 +16,8 @@ CREATE TABLE bitcoin.users (
   "last_name" varchar NULL,
   -- https://www.postgresqltutorial.com/postgresql-date-functions/postgresql-current_timestamp/
   "created_at" TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  "origin" bitcoin.user_origin DEFAULT 'file'
+  "origin" bitcoin.user_origin DEFAULT 'file',
+  UNIQUE("first_name", "last_name")
 );
 
 CREATE TABLE bitcoin.wallets (
