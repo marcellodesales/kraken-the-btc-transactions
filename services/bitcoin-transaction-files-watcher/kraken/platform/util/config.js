@@ -13,9 +13,6 @@ const envVarsSchema = Joi.object({
         .valid('development', 'production', 'test', 'provision')
         .default('development'),
 
-    TRANSACTIONS_WATCHER_PORT: Joi.number()
-        .default(4000),
-
     TRANSACTIONS_WATCHER_SERVICE_NAME: Joi.string()
         .default('kraken-transactions-file-watcher')
         .description('Service name'),
@@ -46,7 +43,6 @@ const isTestEnvironment = envVars.NODE_ENV === 'test';
 const config = {
     // the env driven config
     env: envVars.TRANSACTIONS_WATCHER_ENV,
-    port: envVars.TRANSACTIONS_WATCHER_PORT,
     name: envVars.TRANSACTIONS_WATCHER_SERVICE_NAME,
     apiVersion: envVars.TRANSACTIONS_WATCHER_API_VERSION,
     healthcheckFile: envVars.TRANSACTIONS_WATCHER_HEALTHCHECK_FILE_PATH,
