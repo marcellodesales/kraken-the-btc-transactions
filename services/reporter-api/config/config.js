@@ -25,6 +25,9 @@ const envVarsSchema = Joi.object({
   UNIQUE_NAME_PG_TEST_DB: Joi.string()
     .default('api-test')
     .description('Postgres database for tests'),
+  SERVICE_NAME: Joi.string()
+    .default("bitcoin-service-x")
+    .description("The name of the microservice")
   // UNIQUE_NAME_PG_PORT: Joi.number()
   //   .default(5432),
   // UNIQUE_NAME_PG_HOST: Joi.string()
@@ -53,6 +56,7 @@ const isTestEnvironment = envVars.NODE_ENV === 'test';
 const config = {
   env: envVars.NODE_ENV,
   port: envVars.PORT,
+  name: envVars.SERVICE_NAME,
   apiVersion: envVars.API_VERSION,
   jwtSecret: envVars.JWT_SECRET,
   postgres: {

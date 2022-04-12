@@ -32,9 +32,6 @@ app.use(helmet());
 // enable CORS - Cross Origin Resource Sharing
 app.use(cors());
 
-// This is really just a test output and should be the first thing you see
-winstonInstance.info('The application is starting...');
-
 // enable detailed API logging in dev env
 if (config.env === 'development') {
   expressWinston.requestWhitelist.push('body');
@@ -49,6 +46,9 @@ if (config.env === 'development') {
 
 // Get API Version from .env (or else assume 1.0)
 const baseUrl = `/api/v${config.apiVersion}`;
+
+// This is really just a test output and should be the first thing you see
+winstonInstance.info(`${config.name} initializing service: ${baseUrl}`);
 
 // mount all routes on /api path
 app.use(`${baseUrl}`, routes);

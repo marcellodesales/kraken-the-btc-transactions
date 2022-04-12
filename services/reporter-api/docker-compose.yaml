@@ -25,10 +25,10 @@ services:
 
     # Overwrite any env var defined in .env file (if required)
     environment:
-      KRAKEN_MICROSERVICE: data-watcher
+      SERVICE_NAME: data-watcher
       NODE_ENV: development
       PORT: 4000
-      API_VERSION: 1.0.0
+      API_VERSION: 1
       JWT_SECRET: helloworld
 
     networks:
