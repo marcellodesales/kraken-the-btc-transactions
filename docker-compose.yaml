@@ -18,9 +18,10 @@ services:
       - 5432:5432
     volumes:
       - ./services/database/config:/docker-entrypoint-initdb.d
-      - ./services/database/data:/var/lib/my_data
+      - ./services/database/data:/var/lib/postgresql/data
     networks:
       - blockchain-bitcoin
+    restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 10s
@@ -30,3 +31,40 @@ services:
       options:
         max-size: 10m
         max-file: "3"
+
+  #############
+  # postgrest #
+  #############
+  postgrest:
+    container_name: bitcoin-transactions-postgrest-dev-server
+    image: postgrest/postgrest:v9.0.0.20220211
+    ports:
+      - "4565:3000"
+    # Available environment variables documented here:
+    # https://postgrest.org/en/latest/configuration.html#environment-variables
+    environment:
+      # The standard connection URI format, documented at
+      # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
+      - PGRST_DB_URI=postgres://postgres:postgres@bitcoin-transactions-postgres-dev-server:5432/bitcoin-transactions
+      # The name of which database schema to expose to REST clients
+      - PGRST_DB_SCHEMA=bitcoin
+      # The database role to use when no client authentication is provided
+      - PGRST_DB_ANON_ROLE=api_anon
+      # Overrides the base URL used within the OpenAPI self-documentation hosted at the API root path
+      - PGRST_OPENAPI_SERVER_PROXY_URI=http://localhost:3000
+    networks:
+      - blockchain-bitcoin
+    restart: always
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
+    healthcheck:
+      # docker exec -ti postgrest which wget ---> /usr/bin/wget
+      test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
+      interval: 60s
+      retries: 5
+      start_period: 20s
+      timeout: 10s
