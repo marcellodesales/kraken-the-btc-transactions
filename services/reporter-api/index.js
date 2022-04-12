@@ -7,7 +7,7 @@ const debug = require('debug')(`${config.name}:index`);
 /* eslint-enable no-unused-vars */
 
 // Get default logger
-const logger = loggers.get(config.name); // eslint-disable-line no-global-assign
+const logger = loggers.get(config.loggerName); // eslint-disable-line no-global-assign
 
 // make bluebird default Promise
 Promise = require('bluebird'); // eslint-disable-line no-global-assign
