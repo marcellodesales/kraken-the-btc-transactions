@@ -1,23 +1,22 @@
 import httpStatus from 'http-status';
-import db from '../../config/sequelize';
 
-const { User } = db;
+import User from '../models/user.model'
 
 /**
  * Load user and append to req.
  */
 function load(req, res, next, id) {
-  User.findOne({ where: { id } })
-    .then((user) => {
-      if (!user) {
-        const e = new Error('User does not exist');
-        e.status = httpStatus.NOT_FOUND;
-        return next(e);
-      }
-      req.user = user; // eslint-disable-line no-param-reassign
-      return next();
-    })
-    .catch((e) => next(e));
+  // User.findOne({ where: { id } })
+  //   .then((user) => {
+  //     if (!user) {
+  //       const e = new Error('User does not exist');
+  //       e.status = httpStatus.NOT_FOUND;
+  //       return next(e);
+  //     }
+  //     req.user = user; // eslint-disable-line no-param-reassign
+  //     return next();
+  //   })
+  //   .catch((e) => next(e));
 }
 
 /**

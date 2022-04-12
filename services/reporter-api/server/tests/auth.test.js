@@ -5,7 +5,6 @@ import httpStatus from 'http-status';
 import jwt from 'jsonwebtoken';
 import app from '../../index';
 import config from '../../config/config';
-import db from '../../config/sequelize';
 
 const apiVersionPath = `/api/v${config.apiVersion}`;
 
@@ -17,9 +16,8 @@ describe('## Auth APIs', () => {
   });
 
   afterAll((done) => {
-    db.sequelize.close()
-      .then(() => done())
-      .catch(done);
+    console.log("After all tests")
+
   });
 
   const validUserCredentials = {
