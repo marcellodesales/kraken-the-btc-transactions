@@ -7,7 +7,7 @@ networks:
 services:
 
   postgres:
-    container_name: bitcoin-transactions-postgres-dev-server
+    container_name: bitcoin-transactions-postgres-server
     image: debezium/postgres:14-alpine
     user: postgres
     environment:
@@ -35,9 +35,9 @@ services:
   #############
   # postgrest #
   #############
-  postgrest:
-    container_name: bitcoin-transactions-postgrest-dev-server
-    image: marcellodesales/blockchain-postgres-rest-wrapper
+  postgREST:
+    container_name: bitcoin-transactions-postgres-data-service
+    image: marcellodesales/kraken-blockchain-postgres-rest-wrapper
     build:
       context: services/database-rest-wrapper
       args:
@@ -49,7 +49,7 @@ services:
     environment:
       # The standard connection URI format, documented at
       # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-      - PGRST_DB_URI=postgres://postgres:postgres@bitcoin-transactions-postgres-dev-server:5432/bitcoin-transactions
+      - PGRST_DB_URI=postgres://postgres:postgres@bitcoin-transactions-postgres-server:5432/bitcoin-transactions
       # The name of which database schema to expose to REST clients
       - PGRST_DB_SCHEMA=bitcoin
       # The database role to use when no client authentication is provided
