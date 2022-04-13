@@ -1,5 +1,30 @@
 Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like to propose the following design of runtime components that are deployed in a containerized way, as described in our [[techstack]]
 
+```
+             
+            ┌──────────┐                         ┌──────────┐
+            │ 🔭 🔄 📹 │ Parse, Filter Valid     │┼┼┼┼┼┼┼┼┼┼│
+   ┌────────┴────┐     │Deposits             ┌───┴───────┼┼┼│
+   │Bitcoin      ◄─────┘                     │ 👽 Data   │┼┼│
+   │Transactions │                           │ Service   ├──┘
+   │Processor    ├───────────────────────────►  REST     │
+   └──────────▲──┘  HTTP POST /users         │           │
+      NewFile │     HTTP POST /wallets       │(PostgREST)│
+       Event  │     HTTP POST /transactions  └───▲─────┬─┘
+              │                                  │     │ INSERT INTO users
+     ┌────────┴─┐                                │     │ INSERT INTO transactions
+     │  Volume  │         ┌──────────────────────┘     │ INSERT INTO wallets
+     └──────────┘         │HTTP GET /tr_summary        │ SELECT * FROM tr_summary
+    !/data/transactions   │                            │
+    !/data/users          │                            │
+                          │                ┌───────────▼──────┐
+                          │                ├──────────────────┤
+   ┌─────────────────┐    │                │  🔋 Database     │
+   │  🎤 CLI Viewer  ├────┘                │    (Postgres)    │
+   │                 │                     │ 🗂️ 🗂️ 🗂️ 🗂️ 💰 │
+   └─────────────────┘                     └──────────────────┘
+```
+
 # 🔭 DataFilesWatcher
 
 > Watches a given volume for data files (transactions, users) to be processed
