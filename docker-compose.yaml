@@ -95,14 +95,17 @@ services:
       TRANSACTIONS_WATCHER_HEALTHCHECK_FILE_PATH: /tmp/kraken-transactions-healthcheck
       TRANSACTIONS_WATCHER_DIR_TO_WATCH: /kraken/blockchain/bitcoin/listsinceblock/data
       TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
+      TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
     restart: "no"
     depends_on:
       postgREST:
         condition: service_healthy
+
+    # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
-    # https://stackoverflow.com/questions/48357244/docker-check-if-file-exists-in-healthcheck/48360944#48360944
+    # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script/57803080#57803080
     healthcheck:
-      test: bash -c '[ -S /tmp/kraken-transactions-healthcheck ]' || exit 1
+      test: test -f /tmp/kraken-transactions-healthcheck
       interval: 10s
       timeout: 5s
       retries: 5
