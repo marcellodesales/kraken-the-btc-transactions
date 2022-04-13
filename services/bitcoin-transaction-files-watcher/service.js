@@ -60,17 +60,27 @@ Env vars Config │                             │                             
                 └─────┴─────────────────────────┴──────────────────────────────────────────┴───────┘
  */
 
+const PostgrestClient = require('@supabase/postgrest-js').PostgrestClient
+
 // Load the config instance based on the environment
 const configInstance = require("./kraken/platform/util/config")
+
+// Make the instance to talk to the postgrest REST service, setup for errors
+const postgrestClient = new PostgrestClient(configInstance.transactionsDataServiceHost);
+postgrestClient.shouldThrowOnError = true;
 
 // Load the classes
 const KrakenTransactionsFileWatcher = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsFileWatcher")
 const KrakenValidDepositsByAddressParser = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenValidDepositsByAddressParser")
 const KrakenTransactionsDataRecorder = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataRecorder")
+const KrakenWalletTransactionsAggregator = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsAggregator")
 
 // Provide the file transactions watcher
 new KrakenTransactionsFileWatcher({
     config: configInstance,
     transactionsParser: new KrakenValidDepositsByAddressParser({config: configInstance}),
-    dataServiceClient:  new KrakenTransactionsDataRecorder({config: configInstance})
+    transactionsDataRecorder:  new KrakenTransactionsDataRecorder({config: configInstance,
+        postgrestServiceClient: postgrestClient}),
+    walletTransactionsAggregator:  new KrakenWalletTransactionsAggregator({config: configInstance,
+        postgrestServiceClient: postgrestClient})
 });

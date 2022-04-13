@@ -19,7 +19,7 @@ module.exports = KrakenTransactionsDataRecorder;
  * @param config
  * @constructor
  */
-function KrakenTransactionsDataRecorder({config}) {
+function KrakenTransactionsDataRecorder({config, postgrestServiceClient}) {
     console.log("📹 TransactionsDataRecorder Initializing KrakenTransactionsDataRecorder component...");
 
     // the config to load
@@ -27,7 +27,6 @@ function KrakenTransactionsDataRecorder({config}) {
 
     // Load the client for postgrest https://github.com/supabase/postgrest-js#quick-start
     this.transactionsDataServiceClient = new PostgrestClient(this.config.transactionsDataServiceHost);
-    this.transactionsDataServiceClient.shouldThrowOnError = true;
 }
 
 /**

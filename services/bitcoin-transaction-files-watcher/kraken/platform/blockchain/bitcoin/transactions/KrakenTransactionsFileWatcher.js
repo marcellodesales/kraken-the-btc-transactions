@@ -1,10 +1,9 @@
 const fs = require("fs");
 const os = require('os');
-const {valid} = require("joi");
 
 module.exports = KrakenTransactionsFileWatcher;
 
-function KrakenTransactionsFileWatcher({config, transactionsParser, dataServiceClient}) {
+function KrakenTransactionsFileWatcher({config, transactionsParser, transactionsDataRecorder, walletTransactionsAggregator}) {
     console.log("🔭 DataFilesWatcher Initializing KrakenTransactionsFileWatcher component...");
 
     // the config to load
@@ -14,7 +13,9 @@ function KrakenTransactionsFileWatcher({config, transactionsParser, dataServiceC
     this.transactionsParser = transactionsParser;
 
     // The client that can save the transactions to the sink data store
-    this.dataServiceClient = dataServiceClient;
+    this.transactionsDataRecorder = transactionsDataRecorder;
+
+    this.walletTransactionsAggregator = walletTransactionsAggregator
 
     // The list of files processed
     this.filesPathsProcessed = [];
@@ -143,11 +144,11 @@ KrakenTransactionsFileWatcher.prototype.processTransaction = function processTra
 
     this.transactionsParser.parse(filePath).then((parsedValidDepositsByWallets) => {
         // // Bulk upsert all the wallet addresses before saving the transactions
-        this.dataServiceClient.saveWalletAddresses(parsedValidDepositsByWallets).then((bulkSaveResult) => {
+        this.transactionsDataRecorder.saveWalletAddresses(parsedValidDepositsByWallets).then((bulkSaveResult) => {
             console.log(`Saved ${bulkSaveResult.data.length} wallet addresses from datafile '${filePath}'`);
 
             // // Now, bulk upsert all the transactions from all wallets
-            this.dataServiceClient.saveWalletTransactions(parsedValidDepositsByWallets).then((bulkTransactionsResult) => {
+            this.transactionsDataRecorder.saveWalletTransactions(parsedValidDepositsByWallets).then((bulkTransactionsResult) => {
                 console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`)
 
             }).catch((errorWhileSavingTransactions) => {

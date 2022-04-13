@@ -22,11 +22,12 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 
 * For the data collected by, it submits all the transactions through the client API.
 * It handles bulk updates of the data as it is first filtered and organized properly for faster operations.
-  * It calls the CRUD operations to the TransactionsDataService
+  * It calls the CRUD operations to the `TransactionsDataService`
 
 # 👽 TransactionsDataService
 
 > Exposes APIs to update the database using CRUD operators.
+> Implemented using postgREST.
 > * **NOTE**: (v1) of this solution won't include the endpoints
 
 * `/users`: manages the users and their associated wallets
@@ -41,9 +42,9 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 * It makes sure to generate the proper values to re-compute the current values for faster retrieval.
 * Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)
 * Updates the current known state by a wallet
-  * Delete all current values of aggregates
-  * Updates all the current values
-* The values are used by the CLI Reporter thaths shows the values required.
+    * Delete all current values of aggregates
+    * Updates all the current values
+* The values are used by the CLI Reporter that shows the values required.
 
 # 🎤 CLI Reporter
 
