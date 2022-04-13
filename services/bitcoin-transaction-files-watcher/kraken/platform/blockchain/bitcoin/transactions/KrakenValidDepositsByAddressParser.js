@@ -46,6 +46,8 @@ function KrakenValidDepositsByAddressParser({config}) {
 
     // As documented at https://jqplay.org/s/Vwuqs7ZZCL
     // https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/docs/Requirements-Analysis.md#-sorted-received-transactions
+    // unique transactions bugfix using unique_by on the collections of transactions https://jqplay.org/s/WyAeOp0fn6
+    // https://stackoverflow.com/questions/46397592/jq-removing-duplicates-using-unique-by/46397650#46397650
     this.allValidDepositsJqFilter = `
 [
   .transactions
@@ -59,7 +61,7 @@ function KrakenValidDepositsByAddressParser({config}) {
 | map({
     address: .[0].address,
     count: map(.txid) | length,
-    txs: map({txid: .txid, amount: .amount}) 
+    txs: map({txid: .txid, amount: .amount}) | unique_by({txid})
   })
 `
 };
