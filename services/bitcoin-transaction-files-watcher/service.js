@@ -4,8 +4,8 @@
 
 * The Transactions Database is assumed to be running indirectly through the Transactions Data Service
 * The Transactions Data Service provides a REST Interface to a Postgrest Servcer. The current design of the
-  watcher requires the URL of this service and it's userd by the KrakenTransactionsDataServiceClient.
-* The KrakenTransactionsDataServiceClient makes bulk updates to the Transactions Database through the data service client,
+  watcher requires the URL of this service and it's userd by the KrakenTransactionsDataRecorder.
+* The KrakenTransactionsDataRecorder makes bulk updates to the Transactions Database through the data service client,
   after it has received the parsed transactions from the KrakenValidDepositsByAddressParser.
 * The KrakenValidDepositsByAddressParser implements the filtering solution discussed in the requirements and can be
   used for any other custom filtering of the data, sorting, and making sure the data is unique before storing on the database.
@@ -31,7 +31,7 @@
                 ├─────────────────────────┘   ┌────────────────────────────────────┼───┐           │
                 │                             ├────────────────────────────────────────┤           │
 Env vars Config │                             │                                        ├─────────┐ │
-  Injected      │                             │  KrakenTransactionsDataServiceClient   │         │ │
+  Injected      │                             │  KrakenTransactionsDataRecorder        │         │ │
                 │                             │                                        │         │ │
    │   │   │    │                             └────────────────────────────────────────┘         │ │
    │   │   │    │                                                                                │ │
@@ -66,11 +66,11 @@ const configInstance = require("./kraken/platform/util/config")
 // Load the classes
 const KrakenTransactionsFileWatcher = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsFileWatcher")
 const KrakenValidDepositsByAddressParser = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenValidDepositsByAddressParser")
-const KrakenTransactionsDataServiceClient = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataServiceClient")
+const KrakenTransactionsDataRecorder = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataRecorder")
 
 // Provide the file transactions watcher
 new KrakenTransactionsFileWatcher({
     config: configInstance,
     transactionsParser: new KrakenValidDepositsByAddressParser({config: configInstance}),
-    dataServiceClient:  new KrakenTransactionsDataServiceClient({config: configInstance})
+    dataServiceClient:  new KrakenTransactionsDataRecorder({config: configInstance})
 });

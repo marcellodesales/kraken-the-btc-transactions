@@ -1,7 +1,7 @@
 
 const PostgrestClient = require('@supabase/postgrest-js').PostgrestClient
 
-module.exports = KrakenTransactionsDataServiceClient;
+module.exports = KrakenTransactionsDataRecorder;
 
 /**
  * Parses a parsed deposit transaction
@@ -19,8 +19,8 @@ module.exports = KrakenTransactionsDataServiceClient;
  * @param config
  * @constructor
  */
-function KrakenTransactionsDataServiceClient({config}) {
-    console.log("🪃 DataServiceClient Initializing KrakenTransactionsDataServiceClient component...");
+function KrakenTransactionsDataRecorder({config}) {
+    console.log("📹 TransactionsDataRecorder Initializing KrakenTransactionsDataRecorder component...");
 
     // the config to load
     this.config = config;
@@ -34,7 +34,7 @@ function KrakenTransactionsDataServiceClient({config}) {
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenTransactionsDataServiceClient.prototype.saveWalletAddresses = function saveWalletAddresses(walletsDepositsList) {
+KrakenTransactionsDataRecorder.prototype.saveWalletAddresses = function saveWalletAddresses(walletsDepositsList) {
     console.log("Upsert bulk collection of wallet addresses for faster operation");
 
     // convert from the wallets address to a collection of wallet records
@@ -53,7 +53,7 @@ KrakenTransactionsDataServiceClient.prototype.saveWalletAddresses = function sav
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenTransactionsDataServiceClient.prototype.saveWalletTransactions = function saveWalletTransactions(walletsDepositsList) {
+KrakenTransactionsDataRecorder.prototype.saveWalletTransactions = function saveWalletTransactions(walletsDepositsList) {
     console.log("Upsert bulk collection of transactions by wallets");
 
     let all_transactions = [];

@@ -16,7 +16,7 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 * It's async and subscribes to the message topics of `NewFileEvent` that has a type
 * For `user data files`, it create users and the associated wallets through the API Gateway
 
-# 🪃 DataServiceClient
+# 📹 TransactionsDataRecorder
 
 > Saves the collected data by the DataFileLoader and stores it to the Database through an CRUD HTTP client
 
@@ -96,6 +96,11 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
   * Initially designed to be updated by CDC
   * Should we consider stored procedures?
   * Used for the CLI reporting
+
+# V2 Ultra-scale decoupled solution - Event-driven Data Pipeline
+
+* If we use an async version of the solution, we can scale based on the compute provided.
+* Just declouding the parts with an Event-driven Pipeline with Kafka + CDC
 
 ```
 ┌─────────┐                 ┌──────────┐                  ┌───────────┐
