@@ -1,11 +1,15 @@
 const fs = require("fs");
 const os = require('os');
+const {valid} = require("joi");
 
 module.exports = KrakenTransactionsFileWatcher;
 
-function KrakenTransactionsFileWatcher({config}) {
+function KrakenTransactionsFileWatcher({config, transactionsParser}) {
     // the config to load
     this.config = config;
+
+    // How to parse the transactions
+    this.transactionsParser = transactionsParser;
 
     // The list of files processed
     this.filesPathsProcessed = [];
@@ -130,8 +134,10 @@ KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(ev
  * @param {String} filename is the name of the string, without the directory path.
  */
 KrakenTransactionsFileWatcher.prototype.processTransaction = function processTransaction(filePath) {
-    let transactionFile = require(filePath)
-    console.log(`The transaction file ${filePath} is ${transactionFile}`)
+    console.log(`The transaction file ${filePath} will be parsed...`);
+    this.transactionsParser.parse(filePath).then((validTransactions) => {
+       console.log(`Valid transactions object: ${validTransactions}`);
+    });
 };
 
 /**
