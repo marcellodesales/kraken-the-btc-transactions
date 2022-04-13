@@ -1,0 +1,29 @@
+{
+  "name": "@kraken/bitcoin-transaction-files-watcher",
+  "version": "1.0.0",
+  "description": "The transactions watcher",
+  "main": "lib/reports-watcher",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/marcellodesales/kraken-bitcoin.git"
+  },
+  "dependencies": {
+    "@supabase/postgrest-js": "^0.37.2",
+    "dotenv": "^16.0.0",
+    "joi": "^17.6.0",
+    "node-jq": "^2.3.3"
+  },
+  "bin": {
+    "service": "./service.js"
+  },
+  "scripts": {
+    "start": "node service.js"
+  },
+  "keywords": [
+    "transactions"
+  ],
+  "author": {
+    "name": "Marcello DeSales"
+  },
+  "license": "Kraken"
+}
