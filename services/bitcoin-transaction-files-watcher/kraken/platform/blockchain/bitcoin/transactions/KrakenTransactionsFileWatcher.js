@@ -5,6 +5,8 @@ const {valid} = require("joi");
 module.exports = KrakenTransactionsFileWatcher;
 
 function KrakenTransactionsFileWatcher({config, transactionsParser, dataServiceClient}) {
+    console.log("🔭 DataFilesWatcher Initializing KrakenTransactionsFileWatcher component...");
+
     // the config to load
     this.config = config;
 

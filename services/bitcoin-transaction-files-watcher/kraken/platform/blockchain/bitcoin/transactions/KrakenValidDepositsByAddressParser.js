@@ -41,6 +41,8 @@ module.exports = KrakenValidDepositsByAddressParser;
  * @constructor
  */
 function KrakenValidDepositsByAddressParser({config}) {
+    console.log("🔄 DataFileLoader Initializing KrakenValidDepositsByAddressParser component...");
+
     // the config to load
     this.config = config;
 

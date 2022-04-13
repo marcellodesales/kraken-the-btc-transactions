@@ -20,6 +20,8 @@ module.exports = KrakenTransactionsDataServiceClient;
  * @constructor
  */
 function KrakenTransactionsDataServiceClient({config}) {
+    console.log("🪃 DataServiceClient Initializing KrakenTransactionsDataServiceClient component...");
+
     // the config to load
     this.config = config;
 
