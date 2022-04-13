@@ -42,25 +42,30 @@ CREATE TABLE bitcoin.wallet_transactions (
   FOREIGN KEY ("wallet_address") REFERENCES bitcoin.wallets ("wallet_address") ON DELETE CASCADE ON UPDATE CASCADE
 );
 
-CREATE TABLE bitcoin.transaction_aggregate (
-  "wallet_address" varchar,
-  "category" bitcoin.transaction_category DEFAULT 'receive',
-  "count" int NOT NULL,
-  "total" float NOT NULL,
-  "max" float NOT NULL,
-  "min" float NOT NULL,
-  PRIMARY KEY ("wallet_address", "category"),
-  FOREIGN KEY ("wallet_address") REFERENCES bitcoin.wallets ("wallet_address")
-);
+-- The view of the users and wallets already sorted by the total values. For min, max, just search on the columns
+-- https://stackoverflow.com/questions/406294/left-join-vs-left-outer-join-in-sql-server/406333#406333
+CREATE OR REPLACE VIEW bitcoin.transactions_summary_by_wallet AS
+SELECT
+    wxu.user_id,
+    u.first_name,
+    u.last_name,
+    wt.wallet_address,
+    category,
+    COUNT(amount) as count,
+    SUM(amount) as total,
+    MAX(amount) as max,
+    MIN(amount) as min
+FROM
+    bitcoin.wallet_transactions wt
+    LEFT JOIN
+    bitcoin.wallets_x_users wxu ON wt.wallet_address = wxu.wallet_address
+    LEFT JOIN
+    bitcoin.users u ON wxu.user_id = u.user_id
+GROUP BY (wt.wallet_address, wt.category, wxu.user_id, u.first_name, u.last_name)
+ORDER BY total DESC;
 
 CREATE INDEX "bitcoin.user_unique_full_name_idx" ON bitcoin.users ("first_name", "last_name");
 
 CREATE INDEX "bitcoin.origin_idx" ON bitcoin.users ("origin");
 
 CREATE INDEX "bitcoin.transactions_category_idx" ON bitcoin.wallet_transactions ("category");
-
-CREATE INDEX "bitcoin.aggregate_category_idx" ON bitcoin.transaction_aggregate ("category");
-
-CREATE INDEX "bitcoin.min_idx" ON bitcoin.transaction_aggregate ("min");
-
-CREATE INDEX "bitcoin.max_idx" ON bitcoin.transaction_aggregate ("max");

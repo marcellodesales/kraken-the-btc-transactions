@@ -33,19 +33,24 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 * `/users`: manages the users and their associated wallets
 * `/users/X/wallets`: manages the given `X` wallets
 * It's the only way to directly interface with the Database (Postgres)
-  * Other than Kafka connector for CDC (v2)
+  * ~Other than Kafka connector for CDC (v2)~
 
 # 💰 WalletTransactionsAggregator
 
 > Processes a given wallet's transactions into aggregated [values of total amount deposited, min, max values](https://github.com/marcellodesales/kraken-the-btc-transactions/wiki/Requirements-Analysis#-logs)
 
-* It makes sure to generate the proper values to re-compute the current values for faster retrieval.
-* Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)
-* Updates the current known state by a wallet
-    * Delete all current values of aggregates
-    * Updates all the current values
-* The values are used by the CLI Reporter that shows the values required.
+* ~~It makes sure to generate the proper values to re-compute the current values for faster retrieval.~~
+* ~~Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)~~
+* ~~Updates the current known state by a wallet~~
+    * ~~Delete all current values of aggregates~~
+    * ~~Updates all the current values~~
+* ~~The values are used by the CLI Reporter that shows the values required.~~
 
+* Decided with the implementation of a View in the Database Layer
+  * Results are produced in the data source instead of automating data processing
+  * We can compute the final report properly when retrieving the data. 
+  * Produces the same result of https://jqplay.org/s/weXDSQzPAo
+  
 # 🎤 CLI Reporter
 
 > Produces the required view of the state as log statements
