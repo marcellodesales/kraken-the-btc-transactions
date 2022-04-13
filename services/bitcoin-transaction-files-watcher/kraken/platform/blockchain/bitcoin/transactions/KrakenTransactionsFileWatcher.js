@@ -4,12 +4,15 @@ const {valid} = require("joi");
 
 module.exports = KrakenTransactionsFileWatcher;
 
-function KrakenTransactionsFileWatcher({config, transactionsParser}) {
+function KrakenTransactionsFileWatcher({config, transactionsParser, dataServiceClient}) {
     // the config to load
     this.config = config;
 
     // How to parse the transactions
     this.transactionsParser = transactionsParser;
+
+    // The client that can save the transactions to the sink data store
+    this.dataServiceClient = dataServiceClient;
 
     // The list of files processed
     this.filesPathsProcessed = [];
@@ -22,7 +25,7 @@ function KrakenTransactionsFileWatcher({config, transactionsParser}) {
     console.log("Verifying if the directory " + this.config.dirToWatch + " exists");
 
     // verify that the dir to watch indeed exists before continuing...
-    var stat = fs.statSync(this.config.dirToWatch);
+    const stat = fs.statSync(this.config.dirToWatch);
     if (!stat.isDirectory()) {
         throw new Error(`The path '${this.config.dirToWatch}' is not a dir`);
     }
@@ -134,10 +137,28 @@ KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(ev
  * @param {String} filename is the name of the string, without the directory path.
  */
 KrakenTransactionsFileWatcher.prototype.processTransaction = function processTransaction(filePath) {
-    console.log(`The transaction file ${filePath} will be parsed...`);
-    this.transactionsParser.parse(filePath).then((validTransactions) => {
-       console.log(`Valid transactions object: ${validTransactions}`);
-    });
+    console.log(`The transaction file=${filePath} will be parsed...`);
+
+    this.transactionsParser.parse(filePath).then((parsedValidDepositsByWallets) => {
+        // // Bulk upsert all the wallet addresses before saving the transactions
+        this.dataServiceClient.saveWalletAddresses(parsedValidDepositsByWallets).then((bulkSaveResult) => {
+            console.log(`Saved ${bulkSaveResult.data.length} wallet addresses from datafile '${filePath}'`);
+
+            // // Now, bulk upsert all the transactions from all wallets
+            this.dataServiceClient.saveWalletTransactions(parsedValidDepositsByWallets).then((bulkTransactionsResult) => {
+                console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`)
+
+            }).catch((errorWhileSavingTransactions) => {
+                console.error(`Couldn't save wallets transactions: ${errorWhileSavingTransactions}`)
+            });
+
+        }).catch((errorSavingWallets) => {
+            console.error(`Error saving the wallets: ${errorSavingWallets}`)
+        })
+
+    }).catch((errorParsingTransactions) => {
+        console.error(`Error parsing transaction files: ${errorParsingTransactions}`)
+    })
 };
 
 /**
