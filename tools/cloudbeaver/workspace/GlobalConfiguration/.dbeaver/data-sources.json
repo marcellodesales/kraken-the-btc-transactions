@@ -9,10 +9,10 @@
 			"show-system-objects": true,
 			"read-only": false,
 			"configuration": {
-				"host": "bitcoin-transactions-postgres-dev-server",
+				"host": "bitcoin-transactions-postgres-server",
 				"port": "5432",
 				"database": "bitcoin-transactions",
-				"url": "jdbc:postgresql://bitcoin-transactions-postgres-dev-server:5432/bitcoin-transactions",
+				"url": "jdbc:postgresql://bitcoin-transactions-postgres-server:5432/bitcoin-transactions",
 				"type": "dev",
 				"auth-model": "native"
 			}

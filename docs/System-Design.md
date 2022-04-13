@@ -14,28 +14,40 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 > Loads and Processes a given transaction `filepath` in the volume
 
 * It's async and subscribes to the message topics of `NewFileEvent` that has a type
-* For `user data files`, it create users and the associated wallets through the API Gateway 
-* For `transactions data files`, it creates transactions through the API Gateway
+* For `user data files`, it create users and the associated wallets through the API Gateway
 
-# 👽 APIGateway
+# 🪃 DataServiceClient
+
+> Saves the collected data by the DataFileLoader and stores it to the Database through an CRUD HTTP client
+
+* For the data collected by, it submits all the transactions through the client API.
+* It handles bulk updates of the data as it is first filtered and organized properly for faster operations.
+  * It calls the CRUD operations to the TransactionsDataService
+
+# 👽 TransactionsDataService
 
 > Exposes APIs to update the database using CRUD operators.
+> * **NOTE**: (v1) of this solution won't include the endpoints
 
 * `/users`: manages the users and their associated wallets
-* `/users/X/wallets`: manages the given `X` wallets 
+* `/users/X/wallets`: manages the given `X` wallets
 * It's the only way to directly interface with the Database (Postgres)
-  * Other than Kafka connector for CDC
+  * Other than Kafka connector for CDC (v2)
 
 # 💰 WalletTransactionsAggregator
 
 > Processes a given wallet's transactions into aggregated [values of total amount deposited, min, max values](https://github.com/marcellodesales/kraken-the-btc-transactions/wiki/Requirements-Analysis#-logs)
 
-* Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL
+* It makes sure to generate the proper values to re-compute the current values for faster retrieval.
+* Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)
 * Updates the current known state by a wallet
   * Delete all current values of aggregates
   * Updates all the current values
+* The values are used by the CLI Reporter thaths shows the values required.
 
-# 📊 CLI Reporter
+# 🎤 CLI Reporter
+
+> Produces the required view of the state as log statements
 
 * Implements the [outputs required](https://github.com/marcellodesales/kraken-the-btc-transactions/wiki/Requirements-Analysis#-existing-users-transactions)
   * Show the list of aggregated counts known users' wallets
@@ -84,13 +96,6 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
   * Initially designed to be updated by CDC
   * Should we consider stored procedures?
   * Used for the CLI reporting
-
-# 🎤 CLI Reporter
-
-> Produces the required view of the state as log statements
-
-* It fetches the current cached aggregate reports from `/wallets/reports`
-  * Query parameter `type=` provides the output for each type of required output
 
 ```
 ┌─────────┐                 ┌──────────┐                  ┌───────────┐

@@ -7,10 +7,11 @@ networks:
 services:
 
   postgres:
-    container_name: bitcoin-transactions-postgres-dev-server
+    container_name: bitcoin-transactions-postgres-server
     image: debezium/postgres:14-alpine
     user: postgres
     environment:
+      SERVER_NAME: "🔋 Postgres Database"
       POSTGRES_DB: bitcoin-transactions         # PostgreSQL database
       POSTGRES_USER: postgres                   # PostgreSQL user
       POSTGRES_PASSWORD: postgres               # PostgreSQL password
@@ -35,9 +36,9 @@ services:
   #############
   # postgrest #
   #############
-  postgrest:
-    container_name: bitcoin-transactions-postgrest-dev-server
-    image: marcellodesales/blockchain-postgres-rest-wrapper
+  postgREST:
+    container_name: bitcoin-transactions-postgres-data-service
+    image: marcellodesales/kraken-blockchain-postgres-rest-wrapper
     build:
       context: services/database-rest-wrapper
       args:
@@ -47,15 +48,17 @@ services:
     # Available environment variables documented here:
     # https://postgrest.org/en/latest/configuration.html#environment-variables
     environment:
+      # TODO: Not in use yet
+      SERVER_NAME: "👽 TransactionsDataService"
       # The standard connection URI format, documented at
       # https://www.postgresql.org/docs/current/static/libpq-connect.html#LIBPQ-CONNSTRING
-      - PGRST_DB_URI=postgres://postgres:postgres@bitcoin-transactions-postgres-dev-server:5432/bitcoin-transactions
+      PGRST_DB_URI: postgres://postgres:postgres@bitcoin-transactions-postgres-server:5432/bitcoin-transactions
       # The name of which database schema to expose to REST clients
-      - PGRST_DB_SCHEMA=bitcoin
+      PGRST_DB_SCHEMA: bitcoin
       # The database role to use when no client authentication is provided
-      - PGRST_DB_ANON_ROLE=api_anon
+      PGRST_DB_ANON_ROLE: api_anon
       # Overrides the base URL used within the OpenAPI self-documentation hosted at the API root path
-      - PGRST_OPENAPI_SERVER_PROXY_URI=http://localhost:3000
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:3000
     networks:
       - blockchain-bitcoin
     restart: always
@@ -66,8 +69,43 @@ services:
 
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
     healthcheck:
-      # docker exec -ti postgrest which wget ---> /usr/bin/wget
+      # docker exec -ti postgrest which wget ---> /usr/bin/wget, the internal port within the container
       test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
       interval: 30s
+      timeout: 5s
+      retries: 5
+
+  bitcoin-transactions-data-watcher:
+    container_name: bitcoin-transactions-data-watcher
+    image: marcellodesales/kraken-blockchain-transactions-data-watcher
+    build:
+      context: services/bitcoin-transaction-files-watcher
+      args:
+        BASE_IMAGE: node:16.13.2-alpine3.14
+    networks:
+      - blockchain-bitcoin
+    volumes:
+      - ./data:/kraken/blockchain/bitcoin/listsinceblock/data
+    # Available environment variables documented here:
+    # https://postgrest.org/en/latest/configuration.html#environment-variables
+    environment:
+      TRANSACTIONS_WATCHER_ENV: development
+      TRANSACTIONS_WATCHER_SERVICE_NAME: kraken-transactions-file-watcher
+      TRANSACTIONS_WATCHER_API_VERSION: 1.0.0
+      TRANSACTIONS_WATCHER_HEALTHCHECK_FILE_PATH: /tmp/kraken-transactions-healthcheck
+      TRANSACTIONS_WATCHER_DIR_TO_WATCH: /kraken/blockchain/bitcoin/listsinceblock/data
+      TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
+      TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
+    restart: "no"
+    depends_on:
+      postgREST:
+        condition: service_healthy
+
+    # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
+    # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
+    # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script/57803080#57803080
+    healthcheck:
+      test: test -f /tmp/kraken-transactions-healthcheck
+      interval: 10s
       timeout: 5s
       retries: 5
