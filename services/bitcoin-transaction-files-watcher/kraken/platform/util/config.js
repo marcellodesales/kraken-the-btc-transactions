@@ -1,7 +1,10 @@
 /**
- * express-validation exposes a version of Joi as a hard dependency,
- * in order to avoid compatibility issues with other versions of Joi.
+ /* Copyright ©️ Marcello DeSales - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+ * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
  */
+
 const Joi = require('joi');
 
 // require and configure dotenv, will load vars in .env in PROCESS.ENV

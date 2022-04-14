@@ -6,6 +6,14 @@
 ##
 version: "3.9"
 
+x-kraken-platform-core-logging: &kraken-platform-core-logging
+  options:
+    max-size: 10m
+    max-file: "3"
+
+x-kraken-platform-core-networks: &kraken-platform-core-networks
+  - blockchain-bitcoin
+
 # The local network created for the transactions
 networks:
   blockchain-bitcoin:
@@ -17,8 +25,10 @@ services:
   # Postgres Database #
   #############
   postgres:
-    container_name: bitcoin-transactions-postgres-server
     image: debezium/postgres:14-alpine
+    container_name: bitcoin-transactions-postgres-server
+    logging: *kraken-platform-core-logging
+    networks: *kraken-platform-core-networks
     user: postgres
     environment:
       SERVER_NAME: "🔋 Postgres Database"
@@ -29,26 +39,23 @@ services:
       - 5432:5432
     volumes:
       - ./services/database/config:/docker-entrypoint-initdb.d
+      # If required to persist, uncomment this next volume definition
       #- ./services/database/data:/var/lib/postgresql/data
-    networks:
-      - blockchain-bitcoin
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 5s
       timeout: 5s
       retries: 3
-    logging:
-      options:
-        max-size: 10m
-        max-file: "3"
 
   #############
   # postgrest Data Service #
   #############
   postgREST:
-    container_name: bitcoin-transactions-postgres-data-service
     image: marcellodesales/kraken-blockchain-postgres-rest-wrapper
+    logging: *kraken-platform-core-logging
+    networks: *kraken-platform-core-networks
+    container_name: bitcoin-transactions-postgres-data-service
     build:
       context: services/database-rest-wrapper
       args:
@@ -69,14 +76,7 @@ services:
       PGRST_DB_ANON_ROLE: api_anon
       # Overrides the base URL used within the OpenAPI self-documentation hosted at the API root path
       PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:3000
-    networks:
-      - blockchain-bitcoin
     restart: always
-
-    depends_on:
-      postgres:
-        condition: service_healthy
-
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
     healthcheck:
       # docker exec -ti postgrest which wget ---> /usr/bin/wget, the internal port within the container
@@ -84,24 +84,28 @@ services:
       interval: 3s
       timeout: 5s
       retries: 3
+    depends_on:
+      postgres:
+        condition: service_healthy
 
   #############
   # Bitcoin Transactions reporter #
   #############
-  transactions-watcher:
-    container_name: bitcoin-transactions-data-watcher
+  transactions-data-watcher:
     image: marcellodesales/kraken-blockchain-transactions-data-watcher
+    container_name: bitcoin-transactions-data-watcher
+    logging: *kraken-platform-core-logging
+    networks: *kraken-platform-core-networks
     build:
       context: services/bitcoin-transaction-files-watcher
       args:
         BASE_IMAGE: node:16.13.2-alpine3.14
-    networks:
-      - blockchain-bitcoin
     volumes:
-      - ./data:/kraken/blockchain/bitcoin/listsinceblock/data
+      - ./services/bitcoin-transaction-files-watcher/data:/kraken/blockchain/bitcoin/listsinceblock/data
     # Available environment variables documented here:
     # https://postgrest.org/en/latest/configuration.html#environment-variables
     environment:
+      SERVER_NAME: "🔭 🔄 📹 Bitcoin Transactions Processor"
       TRANSACTIONS_WATCHER_ENV: development
       TRANSACTIONS_WATCHER_SERVICE_NAME: kraken-transactions-file-watcher
       TRANSACTIONS_WATCHER_API_VERSION: 1.0.0
@@ -110,10 +114,6 @@ services:
       TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
       TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
     restart: "no"
-    depends_on:
-      postgREST:
-        condition: service_healthy
-
     # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
     # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script/57803080#57803080
@@ -122,3 +122,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    depends_on:
+      postgREST:
+        condition: service_healthy

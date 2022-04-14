@@ -52,14 +52,24 @@ Building bitcoin-transactions-data-watcher
  => => naming to docker.io/marcellodesales/kraken-blockchain-transactions-data-watcher                                                                                                                                                                                                                                                                   0.0s
 ```
 
+# Setup
+
+* Choose a directory place the transactions directory.
+  * The relative dirs during development can be overridden.
+
+
+
 # Start the containers
 
 * Starts all containers
 
 > If you have changed `Dockerfile`, make sure to rebuild as discussed above.
+> * You must remove existing containers before starting new ones. 
 
 ```console
-docker-compose up -d
+docker-compose stop && \
+  docker-compose rm -f && \
+    docker-compose up -d --build
 ```
 
 # Verify healthcheck
@@ -68,7 +78,87 @@ docker-compose up -d
 docker-compose ps
 ```
 
+* It should output the following:
+
+```console
+$ docker-compose ps
+                   Name                                 Command                  State               Ports         
+-------------------------------------------------------------------------------------------------------------------
+bitcoin-transactions-data-watcher            docker-entrypoint.sh node  ...   Up (healthy)                         
+bitcoin-transactions-postgres-data-service   /usr/local/bin/postgrest         Up (healthy)   0.0.0.0:4565->3000/tcp
+bitcoin-transactions-postgres-server         docker-entrypoint.sh postgres    Up (healthy)   0.0.0.0:5432->5432/tcp
+```
+
+> **NOTE**: The data files must be in the relative directory to docker-compose at this instance.
+
+# Parse when files are added, skip when removed/renamed
+
+* The behavior is to avoid re-executing the same structure.
+
+```console
+bitcoin-transactions-data-watcher | #################### CURRENT WALLET TRANSACTIONS REPORT #######################
+bitcoin-transactions-data-watcher | Deposited for James T. Kirk: count=21 sum=1210.6005826899998
+bitcoin-transactions-data-watcher | Deposited for Spock: count=16 sum=827.6408870999999
+bitcoin-transactions-data-watcher | Deposited for Wesley Crusher: count=35 sum=183
+bitcoin-transactions-data-watcher | Deposited for Montgomery Scott: count=27 sum=131.93252999999999
+bitcoin-transactions-data-watcher | Deposited for Jonathan Archer: count=19 sum=97.49
+bitcoin-transactions-data-watcher | Deposited for Leonard McCoy: count=18 sum=97
+bitcoin-transactions-data-watcher | Deposited for Jadzia Dax: count=15 sum=71.83
+bitcoin-transactions-data-watcher | Deposited without reference: count=23 sum=1151.8873822799999
+bitcoin-transactions-data-watcher | Smallest valid deposit: 0.0000001
+bitcoin-transactions-data-watcher | Largest valid deposit: 99.61064066
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-1.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-1.json not found at fs... Moved, renamed, etc... skipping...
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-2.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-2.json not found at fs... Moved, renamed, etc... skipping...
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-4.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-4.json not found at fs... Moved, renamed, etc... skipping...
+```
+
 # Troubleshooting
+
+## Fault tolerant to Network resources
+
+* The service doesn't die when there's no connectivity to the external resources.
+
+> **NOTE**: However, it must fail when there's no read permissions to the watch dir.
+
+```console
+/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js run start --scripts-prepend-node-path=auto
+
+> @kraken/bitcoin-transaction-files-watcher@1.0.0 start
+> node service.js
+
+🔄 DataFileLoader Initializing KrakenValidDepositsByAddressParser component...
+📹 TransactionsDataRecorder Initializing KrakenTransactionsDataRecorder component...
+🎤 WalletsTransactionsReporter Initializing KrakenWalletTransactionsReporter component...
+🔭 DataFilesWatcher Initializing KrakenTransactionsFileWatcher component...
+Verifying if the directory /Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data exists
+WARN: healthcheck file /tmp/kraken-transactions-healthcheck exists during bootstrap...
+Processing test-transactions-1.json at /Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data
+The transaction file=/Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data/test-transactions-1.json will be parsed...
+Parsing transactions filePath '/Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data/test-transactions-1.json' with 
+                 jq filter: 
+[
+  .transactions
+  | map(select(.category == "receive"))
+  | map(select(.confirmations >= 6))
+  | map(select(.amount > 0))
+  | sort_by(.time)
+  | .[]
+]
+| group_by(.address)
+| map({
+    address: .[0].address,
+    count: map(.txid) | length,
+    txs: map({txid: .txid, amount: .amount}) | unique_by({txid})
+  })
+
+Successfully filtered transactions...
+Upsert bulk collection of wallet addresses for faster operation
+Error saving the wallets: FetchError: request to http://localhost:4565/wallets failed, reason: connect ECONNREFUSED 127.0.0.1:4565
+ERROR: abort: Couldn't process transaction file on bootstrap: FetchError: request to http://localhost:4565/wallets failed, reason: connect ECONNREFUSED 127.0.0.1:4565
+```
 
 ## Healthcheck Not working
 
