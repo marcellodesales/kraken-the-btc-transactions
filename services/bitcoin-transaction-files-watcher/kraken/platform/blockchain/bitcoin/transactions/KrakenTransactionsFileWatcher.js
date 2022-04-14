@@ -42,8 +42,8 @@ function KrakenTransactionsFileWatcher({config, transactionsParser, transactions
     // Just save the healthcheck before it starts bootstrap the reading the files
     this._saveHealthcheckFile();
 
-    //setup the initial status
-    this._checkTransactionFile();
+    // Bootstap the watch dir as it might contain files
+    this._bootstrapCurrentWatchDir()
 };
 
 /**
@@ -79,12 +79,16 @@ KrakenTransactionsFileWatcher.prototype._checkTransactionFile = function _checkT
         this.processTransaction(fullFilePath)
         return
     }
+};
 
+KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = function _bootstrapCurrentWatchDir() {
     // This is triggered when the server bootstraps
     // https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/42734993#42734993
     let dir = fs.readdirSync(this.config.dirToWatch);
     const extension = this.config.transactionsFileExtension
-    let transactionFiles = dir.filter( function( elm ) {return elm.match(extension);});
+    let transactionFiles = dir.filter(function (elm) {
+        return elm.match(extension);
+    });
 
     // For every file that exists during the bootstrap, process them
     transactionFiles.forEach(transactionFileName => {
@@ -149,7 +153,10 @@ KrakenTransactionsFileWatcher.prototype.processTransaction = function processTra
 
             // // Now, bulk upsert all the transactions from all wallets
             this.transactionsDataRecorder.saveWalletTransactions(parsedValidDepositsByWallets).then((bulkTransactionsResult) => {
-                console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`)
+                console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`);
+
+                // Aggregate the values based on the current state
+                this.walletTransactionsAggregator.processWalletDepositsAggregations();
 
             }).catch((errorWhileSavingTransactions) => {
                 console.error(`Couldn't save wallets transactions: ${errorWhileSavingTransactions}`)

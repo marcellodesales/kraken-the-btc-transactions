@@ -20,8 +20,8 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
                           │                ┌───────────▼──────┐
                           │                ├──────────────────┤
    ┌─────────────────┐    │                │  🔋 Database     │
-   │  🎤 CLI Viewer  ├────┘                │    (Postgres)    │
-   │                 │                     │ 🗂️ 🗂️ 🗂️ 🗂️ 💰 │
+   │  🎤 Reporter    ├────┘                │    (Postgres)    │
+   │                 │                     │ 🗂️ 🗂️ 🗂️ 🗂️ 💰  │
    └─────────────────┘                     └──────────────────┘
 ```
 
@@ -76,7 +76,7 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
   * We can compute the final report properly when retrieving the data. 
   * Produces the same result of https://jqplay.org/s/weXDSQzPAo
   
-# 🎤 CLI Reporter
+# 🎤 WalletsTransactionsReporter
 
 > Produces the required view of the state as log statements
 

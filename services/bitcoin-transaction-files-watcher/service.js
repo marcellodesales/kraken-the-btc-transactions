@@ -13,51 +13,55 @@
 * The KrakenTransactionsFileWatcher proxies live notifications of data stored in the volume and lists all the transaction
   files from the provided data location.
 
-                          ┌───────────────────────────┐            ┌──────────────────────────────┐
-                          ├───────────────────────────┤            │                              │
-                          │ Transactions     POSTGRES │            │                              │
-                          │  Database           ┌─────┤            │                              │
-                          │                     │ 5432│◄───────────┤  Transactions Data Service   │
-                          │ - users             └─────┤            │                              │
-                          │ - wallets                 │            │      postgREST Server ┌──────┤
-                          │ - wallets_x_users         │            │                       │ 4565 │
-                          │ - wallet_transactions     │            └───────────────────────┴─▲────┘
-                          │ - transactions_aggregates │                                      │
-                          └───────────────────────────┘               CRUD         ┌─────────┘
-                                                                                   │
-                ┌─────────────────────────┬────────────────────────────────────────┼───────────────┐
-                │ Transactions Data File  │                                        │               │
-                │    Watcher Container    │                                        │               │
-                ├─────────────────────────┘   ┌────────────────────────────────────┼───┐           │
-                │                             ├────────────────────────────────────────┤           │
-Env vars Config │                             │                                        ├─────────┐ │
-  Injected      │                             │  KrakenTransactionsDataRecorder        │         │ │
-                │                             │                                        │         │ │
-   │   │   │    │                             └────────────────────────────────────────┘         │ │
-   │   │   │    │                                                                                │ │
-   └───┴───┴────┼─────┬────┬────┐             ┌───────────────────────────────────────┐          │ │
-                │     │    │    │             ├───────────────────────────────────────┤          │ │
-                │   ┌─▼────▼────▼┐            │                                       │          │ │
-                │   │ config     │            │   KrakenValidDepositsByAddressParser  ├───────┐  │ │
-                │   │            │            │                                       │       │  │ │
-                │   └──────┬─────┘            └───────────────────────────────────────┘       │  │ │
-                │          │                                                                  │  │ │
-                │          │                    ┌────────────────────────────────────┐        │  │ │
-                │   ┌──────┴──────┐             ├────────────────────────────────────┤        │  │ │
-                │   │             │             │                                    │        │  │ │
-                │   │ service.js  ◄─────────────┤   KrakenTransactionsFileWatcher    ◄────────┘  │ │
-                │   │             │             │                                    │           │ │
-                │   └──────┬──────┘             │                                    ◄───────────┘ │
-                │          │                    └───────────────────┬────────────────┘             │
-                │          │                                        │                              │
-                │          │                                        │                              │
-                │          │                                        │                              │
-                │          │                                        │                              │
-                │          │                                        │                              │
-                │     ┌────▼────────────────────┬───────────────────▼──────────────────────┐       │
-                │     │                         │                                          │       │
-                │     │   Healthcheck file      │        Transactions Data volume (files)  │       │
-                └─────┴─────────────────────────┴──────────────────────────────────────────┴───────┘
+                                                              ┌──────────────────────────────┐
+                     ┌───────────────────────────┐            │||||||||||||||||||||||||||||||│
+                     │|||||||||||||||||||||||||||│            ├──────────────────────────────┤
+                     ├───────────────────────────┤            │                              │
+                     │ Transactions     POSTGRES │            │  Transactions Data Service   │
+                     │  Database           ┌─────┤            │                              │
+                     │                     │ 5432│◄───────────┤       postgREST Server       │
+                     │ - users             └─────┤            │                              │
+                     │ - wallets                 │            │                       ┌──────┤
+                     │ - wallets_x_users         │            │                       │ 4565 │
+                     │ - wallet_transactions     │            └───────────────────────┴─▲──▲─┘
+                     │ - transactions_by_wallet  │                                      │  │
+                     └───────────────────────────┘                                 CRUD │  │
+                                                      ┌─────────────────────────────────┘  │
+                                                      │                                    │
+                  ┌───────────────────────────────────┴────────────────────────────────────┴───────────┐
+                  │ TransactionsProcessor||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||│
+                  ├───────────────────────────────────┬────────────────────────────────────┬───────────┤
+                  │                                   │                                    │           │
+                  │  ┌────────────────────────────────┼─┐   ┌──────────────────────────────┼─┐         │
+                  │  ├──────────────────────────────────┤   ├────────────────────────────────┤         │
+                  │  │                                  │   │                                │         │
+                  │  │ KrakenWalletTransactionsReporter │   │ KrakenTransactionsDataRecorder │         │
+                  │  │                                  │   │                                ├───────┐ │
+Env vars Config   │  └──────────────────────────────────┘   └────────────────────────────────┘       │ │
+  Injected        │                                                                                  │ │
+                  │                                 ┌────────────────────────────────────┐           │ │
+   │   │   │      │                                 ├────────────────────────────────────┤           │ │
+   │   │   │      │                                 │                                    │           │ │
+   └───┴───┴──────┼─────────────┬────┬────┐         │ KrakenValidDepositsByAddressParser ├────────┐  │ │
+                  │             │    │    │         │                                    │        │  │ │
+                  │           ┌─▼────▼────▼┐        └────────────────────────────────────┘        │  │ │
+                  │           │ config     │                                                      │  │ │
+                  │           │            │          ┌───────────────────────────────┐           │  │ │
+                  │           └──────┬─────┘          ├───────────────────────────────┤           │  │ │
+                  │                  │                │                               │           │  │ │
+                  │           ┌──────┴──────┐         │ KrakenTransactionsFileWatcher ◄───────────┘  │ │
+                  │           │             ◄─────────┤                               │              │ │
+                  │           │ service.js  │         │                               ◄──────────────┘ │
+                  │           │             │         └─────────────────┬─────────────┘                │
+                  │           └──────┬──────┘                           │                              │
+                  │                  │                                  │                              │
+                  │                  │                                  │                              │
+                  │                  │                                  │                              │
+                  │                  │                                  │                              │
+                  │       ┌──────────▼──────────────┬───────────────────▼──────────────────────┐       │
+                  │       │                         │                                          │       │
+                  │       │   Healthcheck file      │        Transactions Data volume (files)  │       │
+                  └───────┴─────────────────────────┴──────────────────────────────────────────┴───────┘
  */
 
 const PostgrestClient = require('@supabase/postgrest-js').PostgrestClient
@@ -73,7 +77,7 @@ postgrestClient.shouldThrowOnError = true;
 const KrakenTransactionsFileWatcher = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsFileWatcher")
 const KrakenValidDepositsByAddressParser = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenValidDepositsByAddressParser")
 const KrakenTransactionsDataRecorder = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataRecorder")
-const KrakenWalletTransactionsAggregator = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsAggregator")
+const KrakenWalletTransactionsRepoter = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsRepoter")
 
 // Provide the file transactions watcher
 new KrakenTransactionsFileWatcher({
@@ -81,6 +85,6 @@ new KrakenTransactionsFileWatcher({
     transactionsParser: new KrakenValidDepositsByAddressParser({config: configInstance}),
     transactionsDataRecorder:  new KrakenTransactionsDataRecorder({config: configInstance,
         postgrestServiceClient: postgrestClient}),
-    walletTransactionsAggregator:  new KrakenWalletTransactionsAggregator({config: configInstance,
+    walletTransactionsAggregator:  new KrakenWalletTransactionsRepoter({config: configInstance,
         postgrestServiceClient: postgrestClient})
 });
