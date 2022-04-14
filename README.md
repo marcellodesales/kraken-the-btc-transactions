@@ -27,7 +27,7 @@ If you're not comfortable with Node.js, feel free to use the language of your ch
 
 The command `docker-compose up` **MUST**:
 
-1. Read all transactions from `transactions-1.json` and `transactions-2.json` and store all deposits in a database of your choice.
+1. Read all transactions from [./services/bitcoin-transaction-files-watcher/data/transactions-1.json](https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-1.json) and [./services/bitcoin-transaction-files-watcher/data/transactions-2.json](https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-2.json) and store all deposits in a database of your choice.
 2. Read deposits from the database that are good to credit to users and print the following 10 lines on stdout:
 
     ```
