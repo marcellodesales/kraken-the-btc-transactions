@@ -70,6 +70,49 @@ docker-compose ps
 
 # Troubleshooting
 
+## Fault tolerant to Network resources
+
+* The service doesn't die when there's no connectivity to the external resources.
+
+> **NOTE**: However, it must fail when there's no read permissions to the watch dir.
+
+```console
+/usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js run start --scripts-prepend-node-path=auto
+
+> @kraken/bitcoin-transaction-files-watcher@1.0.0 start
+> node service.js
+
+🔄 DataFileLoader Initializing KrakenValidDepositsByAddressParser component...
+📹 TransactionsDataRecorder Initializing KrakenTransactionsDataRecorder component...
+🎤 WalletsTransactionsReporter Initializing KrakenWalletTransactionsRepoter component...
+🔭 DataFilesWatcher Initializing KrakenTransactionsFileWatcher component...
+Verifying if the directory /Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data exists
+WARN: healthcheck file /tmp/kraken-transactions-healthcheck exists during bootstrap...
+Processing test-transactions-1.json at /Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data
+The transaction file=/Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data/test-transactions-1.json will be parsed...
+Parsing transactions filePath '/Users/marcellodesales/dev/github.com/marcellodesales/kraken-the-btc-transactions/services/bitcoin-transaction-files-watcher/data/test-transactions-1.json' with 
+                 jq filter: 
+[
+  .transactions
+  | map(select(.category == "receive"))
+  | map(select(.confirmations >= 6))
+  | map(select(.amount > 0))
+  | sort_by(.time)
+  | .[]
+]
+| group_by(.address)
+| map({
+    address: .[0].address,
+    count: map(.txid) | length,
+    txs: map({txid: .txid, amount: .amount}) | unique_by({txid})
+  })
+
+Successfully filtered transactions...
+Upsert bulk collection of wallet addresses for faster operation
+Error saving the wallets: FetchError: request to http://localhost:4565/wallets failed, reason: connect ECONNREFUSED 127.0.0.1:4565
+ERROR: abort: Couldn't process transaction file on bootstrap: FetchError: request to http://localhost:4565/wallets failed, reason: connect ECONNREFUSED 127.0.0.1:4565
+```
+
 ## Healthcheck Not working
 
 * Make sure to verify the root causes

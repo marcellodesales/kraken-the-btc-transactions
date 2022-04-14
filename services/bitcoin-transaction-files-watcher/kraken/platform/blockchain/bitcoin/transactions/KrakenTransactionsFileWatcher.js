@@ -98,21 +98,23 @@ KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = async functi
     });
 
     // For every file that exists during the bootstrap, process them
-    for (const transactionFileName of transactionFiles) {
-        console.log(`Processing ${transactionFileName} at ${this.config.dirToWatch}`)
-        const fullFilePath = `${this.config.dirToWatch}/${transactionFileName}`;
-        try {
-            let bootstrapping = true;
-            const result = await this.processTransaction(fullFilePath, bootstrapping);
-            this.filesPathsProcessed.push(fullFilePath);
+    try {
+        for (const transactionFileName of transactionFiles) {
+            console.log(`Processing ${transactionFileName} at ${this.config.dirToWatch}`)
+            const fullFilePath = `${this.config.dirToWatch}/${transactionFileName}`;
 
-        } catch (errorProcessingTransactionFile) {
-            console.error(`Couldn't process transaction file on bootstrap: ${errorProcessingTransactionFile}`)
+                let bootstrapping = true;
+                const result = await this.processTransaction(fullFilePath, bootstrapping);
+                this.filesPathsProcessed.push(fullFilePath);
         }
-    }
 
-    // After it has bootstrapped, we can call
-    this.walletTransactionsAggregator.processWalletDepositsAggregations();
+        // After it has bootstrapped, we can call
+        this.walletTransactionsAggregator.processWalletDepositsAggregations();
+
+    } catch (errorProcessingTransactionFile) {
+        console.error(`ERROR: Couldn't process transaction file on bootstrap: ${errorProcessingTransactionFile}`);
+        console.error("INFO: Make sure that all resources are connected for proper execution...")
+    }
 };
 
 /**
@@ -163,7 +165,7 @@ KrakenTransactionsFileWatcher.prototype.processTransaction = async function proc
 
     } catch (errorParsingTransactions) {
         console.error(`Error parsing transaction files: ${errorParsingTransactions}`);
-        return;
+        throw errorParsingTransactions;
     }
 
     try {
@@ -173,6 +175,7 @@ KrakenTransactionsFileWatcher.prototype.processTransaction = async function proc
 
     } catch (errorSavingWallets) {
         console.error(`Error saving the wallets: ${errorSavingWallets}`);
+        throw errorSavingWallets;
     }
 
     try {
@@ -182,6 +185,7 @@ KrakenTransactionsFileWatcher.prototype.processTransaction = async function proc
 
     } catch (errorWhileSavingTransactions) {
         console.error(`Couldn't save wallets transactions: ${errorWhileSavingTransactions}`);
+        throw errorWhileSavingTransactions;
     }
 
     if (!bootstrapping) {
