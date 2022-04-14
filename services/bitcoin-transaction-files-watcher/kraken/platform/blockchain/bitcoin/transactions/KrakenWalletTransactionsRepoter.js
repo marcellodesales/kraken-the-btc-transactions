@@ -1,3 +1,9 @@
+/**
+ /* Copyright ©️ Marcello DeSales - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+ * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+ */
 
 module.exports = KrakenWalletTransactionsRepoter;
 
@@ -56,6 +62,12 @@ KrakenWalletTransactionsRepoter.prototype.processWalletDepositsAggregations = fu
         })
 };
 
+/**
+ * Formats the deposits summary to the one required by the specifications.
+ * @param depositsSummary
+ * @returns {{min: {instances: *[], report: *[]}, max: {instances: *[], report: *[]}, unknownUsers: {instances: *[], report: *[]}, knownUsers: {instances: *[], report: *[]}}}
+ * @private
+ */
 KrakenWalletTransactionsRepoter.prototype._formatReport = function formatReport(depositsSummary) {
     let transactionsSummary = {
         knownUsers: {
@@ -119,6 +131,9 @@ KrakenWalletTransactionsRepoter.prototype._formatReport = function formatReport(
 };
 
 // https://stackoverflow.com/questions/18719775/parsing-and-converting-exponential-values-to-decimal-in-javascript/18719988#18719988
+/**
+ * @returns {string} The decimal number from the scientific value.
+ */
 Number.prototype.noExponents = function() {
     var data = String(this).split(/[eE]/);
     if (data.length == 1) return data[0];

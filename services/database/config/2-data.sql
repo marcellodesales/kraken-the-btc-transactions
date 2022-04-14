@@ -1,3 +1,10 @@
+--##
+--# Copyright ©️ Marcello DeSales - All Rights Reserved
+--# Unauthorized copying of this file, via any medium is strictly prohibited
+--# Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+--# Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+--##
+
 -- Initial users and wallets https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/docs/Requirements-Analysis.md#-known-customers
 -- Insert last value: https://stackoverflow.com/questions/6560447/can-i-use-return-value-of-insert-returning-in-another-insert/6560530#6560530
 

@@ -1,5 +1,12 @@
+--##
+--# Copyright ©️ Marcello DeSales - All Rights Reserved
+--# Unauthorized copying of this file, via any medium is strictly prohibited
+--# Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+--# Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+--##
 
--- Create users
+-- Create users for the PostGREST API and protect the server. Allowing it all open for testing
+
 -- https://samkhawase.com/blog/postgrest/postgresql_db_and_entities/
 CREATE ROLE api_anon nologin;
 CREATE ROLE authenticator WITH NOINHERIT LOGIN PASSWORD 'password';

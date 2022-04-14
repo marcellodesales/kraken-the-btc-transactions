@@ -1,3 +1,9 @@
+/**
+ /* Copyright ©️ Marcello DeSales - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+ * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+ */
 
 const PostgrestClient = require('@supabase/postgrest-js').PostgrestClient
 

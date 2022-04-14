@@ -5,7 +5,7 @@
   "main": "lib/reports-watcher",
   "repository": {
     "type": "git",
-    "url": "https://github.com/marcellodesales/kraken-bitcoin.git"
+    "url": "https://github.com/marcellodesales/kraken-the-btc-transactions.git"
   },
   "dependencies": {
     "@supabase/postgrest-js": "^0.37.2",
@@ -23,7 +23,8 @@
     "transactions"
   ],
   "author": {
-    "name": "Marcello DeSales"
+    "name": "Marcello DeSales",
+    "email": "marcello.desales@gmail.com"
   },
-  "license": "Kraken"
+  "license": "Proprietary"
 }
