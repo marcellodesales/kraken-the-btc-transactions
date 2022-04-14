@@ -52,6 +52,13 @@ Building bitcoin-transactions-data-watcher
  => => naming to docker.io/marcellodesales/kraken-blockchain-transactions-data-watcher                                                                                                                                                                                                                                                                   0.0s
 ```
 
+# Setup
+
+* Choose a directory place the transactions directory.
+  * The relative dirs during development can be overridden.
+
+
+
 # Start the containers
 
 * Starts all containers
@@ -67,6 +74,19 @@ docker-compose up -d
 ```console
 docker-compose ps
 ```
+
+* It should output the following:
+
+```console
+$ docker-compose ps
+                   Name                                 Command                  State               Ports         
+-------------------------------------------------------------------------------------------------------------------
+bitcoin-transactions-data-watcher            docker-entrypoint.sh node  ...   Up (healthy)                         
+bitcoin-transactions-postgres-data-service   /usr/local/bin/postgrest         Up (healthy)   0.0.0.0:4565->3000/tcp
+bitcoin-transactions-postgres-server         docker-entrypoint.sh postgres    Up (healthy)   0.0.0.0:5432->5432/tcp
+```
+
+> **NOTE**: The data files must be in the relative directory to docker-compose at this instance.
 
 # Troubleshooting
 
