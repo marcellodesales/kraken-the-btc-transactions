@@ -6,22 +6,12 @@
  */
 
 /**
- * Parses a parsed deposit transaction
- *  {
- *   "address": "myuPFnmpChJurtvdKCVVK5S4ZU9JcgSmoj",
- *   "count": 1,
- *   "txs": [
- *     {
- *       "txid": "2e249dbe4706cca44324c294f8842627b42bb8fab30539288b0ee94b76340cd4",
- *       "amount": 28.62734149
- *     }
- *   ]
- * },
  *
- * @param config
- * @constructor
+ * Persists the transaction in the database through the data service client.
+ *
+ * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes
  */
-module.exports = class KrakenTransactionsDataRecorder {
+class KrakenTransactionsDataRecorder {
 
     /**
      * The config and the instance of the data service.
@@ -39,8 +29,7 @@ module.exports = class KrakenTransactionsDataRecorder {
     }
 
     /**
-     * Saves the healthcheck file for container healthcheck
-     * @private
+     * Saves the wallet addresses into the data storage.
      */
     saveWalletAddresses(walletsDepositsList) {
         console.log("Upsert bulk collection of wallet addresses for faster operation");
@@ -58,8 +47,7 @@ module.exports = class KrakenTransactionsDataRecorder {
     };
 
     /**
-     * Saves the healthcheck file for container healthcheck
-     * @private
+     * Saves the wallet transactions in the database.
      */
     async saveWalletTransactions(walletsDepositsList) {
         console.log("Upsert bulk collection of transactions by wallets");
@@ -84,3 +72,5 @@ module.exports = class KrakenTransactionsDataRecorder {
             .upsert(all_transactions)
     };
 }
+
+module.exports = KrakenTransactionsDataRecorder;

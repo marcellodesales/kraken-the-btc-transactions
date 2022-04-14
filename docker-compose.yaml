@@ -88,38 +88,38 @@ services:
   #############
   # Bitcoin Transactions reporter #
   #############
-  transactions-watcher:
-    container_name: bitcoin-transactions-data-watcher
-    image: marcellodesales/kraken-blockchain-transactions-data-watcher
-    build:
-      context: services/bitcoin-transaction-files-watcher
-      args:
-        BASE_IMAGE: node:16.13.2-alpine3.14
-    networks:
-      - blockchain-bitcoin
-    volumes:
-      - ./data:/kraken/blockchain/bitcoin/listsinceblock/data
-    # Available environment variables documented here:
-    # https://postgrest.org/en/latest/configuration.html#environment-variables
-    environment:
-      SERVER_NAME: "🔭 🔄 📹 Bitcoin Transactions Processor"
-      TRANSACTIONS_WATCHER_ENV: development
-      TRANSACTIONS_WATCHER_SERVICE_NAME: kraken-transactions-file-watcher
-      TRANSACTIONS_WATCHER_API_VERSION: 1.0.0
-      TRANSACTIONS_WATCHER_HEALTHCHECK_FILE_PATH: /tmp/kraken-transactions-healthcheck
-      TRANSACTIONS_WATCHER_DIR_TO_WATCH: /kraken/blockchain/bitcoin/listsinceblock/data
-      TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
-      TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
-    restart: "no"
-    depends_on:
-      postgREST:
-        condition: service_healthy
-
-    # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
-    # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
-    # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script/57803080#57803080
-    healthcheck:
-      test: test -f /tmp/kraken-transactions-healthcheck
-      interval: 10s
-      timeout: 5s
-      retries: 5
+#  transactions-watcher:
+#    container_name: bitcoin-transactions-data-watcher
+#    image: marcellodesales/kraken-blockchain-transactions-data-watcher
+#    build:
+#      context: services/bitcoin-transaction-files-watcher
+#      args:
+#        BASE_IMAGE: node:16.13.2-alpine3.14
+#    networks:
+#      - blockchain-bitcoin
+#    volumes:
+#      - ./data:/kraken/blockchain/bitcoin/listsinceblock/data
+#    # Available environment variables documented here:
+#    # https://postgrest.org/en/latest/configuration.html#environment-variables
+#    environment:
+#      SERVER_NAME: "🔭 🔄 📹 Bitcoin Transactions Processor"
+#      TRANSACTIONS_WATCHER_ENV: development
+#      TRANSACTIONS_WATCHER_SERVICE_NAME: kraken-transactions-file-watcher
+#      TRANSACTIONS_WATCHER_API_VERSION: 1.0.0
+#      TRANSACTIONS_WATCHER_HEALTHCHECK_FILE_PATH: /tmp/kraken-transactions-healthcheck
+#      TRANSACTIONS_WATCHER_DIR_TO_WATCH: /kraken/blockchain/bitcoin/listsinceblock/data
+#      TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
+#      TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
+#    restart: "no"
+#    depends_on:
+#      postgREST:
+#        condition: service_healthy
+#
+#    # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
+#    # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
+#    # https://stackoverflow.com/questions/40082346/how-to-check-if-a-file-exists-in-a-shell-script/57803080#57803080
+#    healthcheck:
+#      test: test -f /tmp/kraken-transactions-healthcheck
+#      interval: 10s
+#      timeout: 5s
+#      retries: 5

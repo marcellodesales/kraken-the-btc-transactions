@@ -1,4 +1,9 @@
-"use strict";
+/**
+ /* Copyright ©️ Marcello DeSales - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+ * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+ */
 
 /*
 
@@ -79,12 +84,12 @@ const KrakenValidDepositsByAddressParser = require("./kraken/platform/blockchain
 const KrakenTransactionsDataRecorder = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataRecorder")
 const KrakenWalletTransactionsReporter = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsReporter")
 
-// Provide the file transactions watcher
+// Provide the file transactions watcher, will keep the process bound to the fs events.
 new KrakenTransactionsFileWatcher({
     config: configInstance,
     transactionsParser: new KrakenValidDepositsByAddressParser({config: configInstance}),
     transactionsDataRecorder:  new KrakenTransactionsDataRecorder({config: configInstance,
         postgrestServiceClient: postgrestClient}),
-    walletTransactionsAggregator:  new KrakenWalletTransactionsReporter({config: configInstance,
+    walletTransactionsReporter:  new KrakenWalletTransactionsReporter({config: configInstance,
         postgrestServiceClient: postgrestClient})
 });
