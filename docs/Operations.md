@@ -64,9 +64,12 @@ Building bitcoin-transactions-data-watcher
 * Starts all containers
 
 > If you have changed `Dockerfile`, make sure to rebuild as discussed above.
+> * You must remove existing containers before starting new ones. 
 
 ```console
-docker-compose up -d
+docker-compose stop && \
+  docker-compose rm -f && \
+    docker-compose up -d --build
 ```
 
 # Verify healthcheck
@@ -87,6 +90,30 @@ bitcoin-transactions-postgres-server         docker-entrypoint.sh postgres    Up
 ```
 
 > **NOTE**: The data files must be in the relative directory to docker-compose at this instance.
+
+# Parse when files are added, skip when removed/renamed
+
+* The behavior is to avoid re-executing the same structure.
+
+```console
+bitcoin-transactions-data-watcher | #################### CURRENT WALLET TRANSACTIONS REPORT #######################
+bitcoin-transactions-data-watcher | Deposited for James T. Kirk: count=21 sum=1210.6005826899998
+bitcoin-transactions-data-watcher | Deposited for Spock: count=16 sum=827.6408870999999
+bitcoin-transactions-data-watcher | Deposited for Wesley Crusher: count=35 sum=183
+bitcoin-transactions-data-watcher | Deposited for Montgomery Scott: count=27 sum=131.93252999999999
+bitcoin-transactions-data-watcher | Deposited for Jonathan Archer: count=19 sum=97.49
+bitcoin-transactions-data-watcher | Deposited for Leonard McCoy: count=18 sum=97
+bitcoin-transactions-data-watcher | Deposited for Jadzia Dax: count=15 sum=71.83
+bitcoin-transactions-data-watcher | Deposited without reference: count=23 sum=1151.8873822799999
+bitcoin-transactions-data-watcher | Smallest valid deposit: 0.0000001
+bitcoin-transactions-data-watcher | Largest valid deposit: 99.61064066
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-1.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-1.json not found at fs... Moved, renamed, etc... skipping...
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-2.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-2.json not found at fs... Moved, renamed, etc... skipping...
+bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-4.json
+bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-4.json not found at fs... Moved, renamed, etc... skipping...
+```
 
 # Troubleshooting
 
