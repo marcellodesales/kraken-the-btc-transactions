@@ -1,7 +1,13 @@
+/**
+ /* Copyright ©️ Marcello DeSales - All Rights Reserved
+ * Unauthorized copying of this file, via any medium is strictly prohibited
+ * Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+ * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+ */
 
 const PostgrestClient = require('@supabase/postgrest-js').PostgrestClient
 
-module.exports = KrakenTransactionsDataServiceClient;
+module.exports = KrakenTransactionsDataRecorder;
 
 /**
  * Parses a parsed deposit transaction
@@ -19,22 +25,21 @@ module.exports = KrakenTransactionsDataServiceClient;
  * @param config
  * @constructor
  */
-function KrakenTransactionsDataServiceClient({config}) {
-    console.log("🪃 DataServiceClient Initializing KrakenTransactionsDataServiceClient component...");
+function KrakenTransactionsDataRecorder({config, postgrestServiceClient}) {
+    console.log("📹 TransactionsDataRecorder Initializing KrakenTransactionsDataRecorder component...");
 
     // the config to load
     this.config = config;
 
     // Load the client for postgrest https://github.com/supabase/postgrest-js#quick-start
     this.transactionsDataServiceClient = new PostgrestClient(this.config.transactionsDataServiceHost);
-    this.transactionsDataServiceClient.shouldThrowOnError = true;
 }
 
 /**
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenTransactionsDataServiceClient.prototype.saveWalletAddresses = function saveWalletAddresses(walletsDepositsList) {
+KrakenTransactionsDataRecorder.prototype.saveWalletAddresses = function saveWalletAddresses(walletsDepositsList) {
     console.log("Upsert bulk collection of wallet addresses for faster operation");
 
     // convert from the wallets address to a collection of wallet records
@@ -53,7 +58,7 @@ KrakenTransactionsDataServiceClient.prototype.saveWalletAddresses = function sav
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenTransactionsDataServiceClient.prototype.saveWalletTransactions = function saveWalletTransactions(walletsDepositsList) {
+KrakenTransactionsDataRecorder.prototype.saveWalletTransactions = async function saveWalletTransactions(walletsDepositsList) {
     console.log("Upsert bulk collection of transactions by wallets");
 
     let all_transactions = [];

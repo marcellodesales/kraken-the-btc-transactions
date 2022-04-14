@@ -1,5 +1,30 @@
 Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like to propose the following design of runtime components that are deployed in a containerized way, as described in our [[techstack]]
 
+```
+             
+            ┌──────────┐                         ┌──────────┐
+            │ 🔭 🔄 📹 │ Parse, Filter Valid     │┼┼┼┼┼┼┼┼┼┼│
+   ┌────────┴────┐     │Deposits             ┌───┴───────┼┼┼│
+   │Bitcoin      ◄─────┘                     │ 👽 Data   │┼┼│
+   │Transactions │                           │ Service   ├──┘
+   │Processor    ├───────────────────────────►  REST     │
+   └──────────▲──┘  HTTP POST /users         │           │
+      NewFile │     HTTP POST /wallets       │(PostgREST)│
+       Event  │     HTTP POST /transactions  └───▲─────┬─┘
+              │                                  │     │ INSERT INTO users
+     ┌────────┴─┐                                │     │ INSERT INTO transactions
+     │  Volume  │         ┌──────────────────────┘     │ INSERT INTO wallets
+     └──────────┘         │HTTP GET /tr_summary        │ SELECT * FROM tr_summary
+    !/data/transactions   │                            │
+    !/data/users          │                            │
+                          │                ┌───────────▼──────┐
+                          │                ├──────────────────┤
+   ┌─────────────────┐    │                │  🔋 Database     │
+   │  🎤 Reporter    ├────┘                │    (Postgres)    │
+   │                 │                     │ 🗂️ 🗂️ 🗂️ 🗂️ 💰  │
+   └─────────────────┘                     └──────────────────┘
+```
+
 # 🔭 DataFilesWatcher
 
 > Watches a given volume for data files (transactions, users) to be processed
@@ -16,36 +41,42 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 * It's async and subscribes to the message topics of `NewFileEvent` that has a type
 * For `user data files`, it create users and the associated wallets through the API Gateway
 
-# 🪃 DataServiceClient
+# 📹 TransactionsDataRecorder
 
 > Saves the collected data by the DataFileLoader and stores it to the Database through an CRUD HTTP client
 
 * For the data collected by, it submits all the transactions through the client API.
 * It handles bulk updates of the data as it is first filtered and organized properly for faster operations.
-  * It calls the CRUD operations to the TransactionsDataService
+  * It calls the CRUD operations to the `TransactionsDataService`
 
 # 👽 TransactionsDataService
 
 > Exposes APIs to update the database using CRUD operators.
+> Implemented using postgREST.
 > * **NOTE**: (v1) of this solution won't include the endpoints
 
 * `/users`: manages the users and their associated wallets
 * `/users/X/wallets`: manages the given `X` wallets
 * It's the only way to directly interface with the Database (Postgres)
-  * Other than Kafka connector for CDC (v2)
+  * ~Other than Kafka connector for CDC (v2)~
 
 # 💰 WalletTransactionsAggregator
 
 > Processes a given wallet's transactions into aggregated [values of total amount deposited, min, max values](https://github.com/marcellodesales/kraken-the-btc-transactions/wiki/Requirements-Analysis#-logs)
 
-* It makes sure to generate the proper values to re-compute the current values for faster retrieval.
-* Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)
-* Updates the current known state by a wallet
-  * Delete all current values of aggregates
-  * Updates all the current values
-* The values are used by the CLI Reporter thaths shows the values required.
+* ~~It makes sure to generate the proper values to re-compute the current values for faster retrieval.~~
+* ~~Subscribed to `AggregateTransactionsEvent` CDC by Kafka + PostgreSQL (v2)~~
+* ~~Updates the current known state by a wallet~~
+    * ~~Delete all current values of aggregates~~
+    * ~~Updates all the current values~~
+* ~~The values are used by the CLI Reporter that shows the values required.~~
 
-# 🎤 CLI Reporter
+* Decided with the implementation of a View in the Database Layer
+  * Results are produced in the data source instead of automating data processing
+  * We can compute the final report properly when retrieving the data. 
+  * Produces the same result of https://jqplay.org/s/weXDSQzPAo
+  
+# 🎤 WalletsTransactionsReporter
 
 > Produces the required view of the state as log statements
 
@@ -96,6 +127,11 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
   * Initially designed to be updated by CDC
   * Should we consider stored procedures?
   * Used for the CLI reporting
+
+# V2 Ultra-scale decoupled solution - Event-driven Data Pipeline
+
+* If we use an async version of the solution, we can scale based on the compute provided.
+* Just declouding the parts with an Event-driven Pipeline with Kafka + CDC
 
 ```
 ┌─────────┐                 ┌──────────┐                  ┌───────────┐

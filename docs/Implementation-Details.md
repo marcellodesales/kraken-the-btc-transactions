@@ -5,8 +5,8 @@ The system is now implemented and here is the current design of this solution:
 * [x] The `Transactions Database` is assumed to be running indirectly through the `Transactions Data Service`.
   * It serves the durable data storage of the transactions for analysis.
 * [x] The `Transactions Data Service` provides a REST Interface to a `Postgrest Servcer`. 
-  * The current design of the watcher requires the URL of this service and it's userd by the `KrakenTransactionsDataServiceClient`.
-* [x] The `KrakenTransactionsDataServiceClient` makes bulk updates to the `Transactions Database` through the `Data Service client`.
+  * The current design of the watcher requires the URL of this service and it's userd by the `KrakenTransactionsDataRecorder`.
+* [x] The `KrakenTransactionsDataRecorder` makes bulk updates to the `Transactions Database` through the `Data Service client`.
   * Before, it receives the parsed transactions from the `KrakenValidDepositsByAddressParser`.
 * [x] The `KrakenValidDepositsByAddressParser` implements the filtering solution of the valid transactions.
   * Discussed in the requirements, this component is used for any other custom filtering of the valid transactions.
@@ -37,7 +37,7 @@ The system is now implemented and here is the current design of this solution:
                 ├─────────────────────────┘   ┌────────────────────────────────────┼───┐           │
                 │                             ├────────────────────────────────────────┤           │
 Env vars Config │                             │                                        ├─────────┐ │
-  Injected      │                             │  KrakenTransactionsDataServiceClient   │         │ │
+  Injected      │                             │  KrakenTransactionsDataRecorder        │         │ │
                 │                             │                                        │         │ │
    │   │   │    │                             └────────────────────────────────────────┘         │ │
    │   │   │    │                                                                                │ │

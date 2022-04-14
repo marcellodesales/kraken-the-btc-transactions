@@ -1,11 +1,21 @@
+##
+# Copyright ©️ Marcello DeSales - All Rights Reserved
+# Unauthorized copying of this file, via any medium is strictly prohibited
+# Proprietary and confidential for the purpose of Interview with Kraken's Engineering.
+# Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
+##
 version: "3.9"
 
+# The local network created for the transactions
 networks:
   blockchain-bitcoin:
     name: blockchain-bitcoin-net
 
 services:
 
+  #############
+  # Postgres Database #
+  #############
   postgres:
     container_name: bitcoin-transactions-postgres-server
     image: debezium/postgres:14-alpine
@@ -25,16 +35,16 @@ services:
     restart: on-failure
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 3
     logging:
       options:
         max-size: 10m
         max-file: "3"
 
   #############
-  # postgrest #
+  # postgrest Data Service #
   #############
   postgREST:
     container_name: bitcoin-transactions-postgres-data-service
@@ -71,11 +81,14 @@ services:
     healthcheck:
       # docker exec -ti postgrest which wget ---> /usr/bin/wget, the internal port within the container
       test: wget --no-verbose --tries=1 --spider http://localhost:3000 || exit 1
-      interval: 30s
+      interval: 3s
       timeout: 5s
-      retries: 5
+      retries: 3
 
-  bitcoin-transactions-data-watcher:
+  #############
+  # Bitcoin Transactions reporter #
+  #############
+  transactions-watcher:
     container_name: bitcoin-transactions-data-watcher
     image: marcellodesales/kraken-blockchain-transactions-data-watcher
     build:
