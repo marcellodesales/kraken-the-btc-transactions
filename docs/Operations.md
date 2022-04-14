@@ -57,8 +57,6 @@ Building bitcoin-transactions-data-watcher
 * Choose a directory place the transactions directory.
   * The relative dirs during development can be overridden.
 
-
-
 # Start the containers
 
 * Starts all containers
@@ -95,6 +93,8 @@ bitcoin-transactions-postgres-server         docker-entrypoint.sh postgres    Up
 
 * The behavior is to avoid re-executing the same structure.
 
+> To view only the logs of the results: `docker-compose logs transactions-data-watcher`
+
 ```console
 bitcoin-transactions-data-watcher | #################### CURRENT WALLET TRANSACTIONS REPORT #######################
 bitcoin-transactions-data-watcher | Deposited for James T. Kirk: count=21 sum=1210.6005826899998
@@ -114,6 +114,12 @@ bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsincebl
 bitcoin-transactions-data-watcher | INFO: Async file-system event triggered: eventType=rename, filename=test-transactions-4.json
 bitcoin-transactions-data-watcher | WARN: /kraken/blockchain/bitcoin/listsinceblock/data/test-transactions-4.json not found at fs... Moved, renamed, etc... skipping...
 ```
+
+## Additional Files
+
+* While the container is running, you can add files to the data directory and they will be handled asynchronously.
+  * The service is listening to the file-system events
+  * The re-computation of the report is done automatically.
 
 # Troubleshooting
 

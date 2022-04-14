@@ -75,7 +75,7 @@ services:
       # The database role to use when no client authentication is provided
       PGRST_DB_ANON_ROLE: api_anon
       # Overrides the base URL used within the OpenAPI self-documentation hosted at the API root path
-      PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:3000
+      PGRST_OPENAPI_SERVER_PROXY_URI: http://localhost:4565
     restart: always
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
     healthcheck:
