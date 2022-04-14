@@ -23,6 +23,7 @@ services:
 
   #############
   # Postgres Database #
+  # https://github.com/mattddowney/compose-postgrest/blob/master/docker-compose.yml
   #############
   postgres:
     image: debezium/postgres:14-alpine
@@ -50,9 +51,10 @@ services:
 
   #############
   # postgrest Data Service #
+  # https://github.com/mattddowney/compose-postgrest#architecture
   #############
   postgREST:
-    image: marcellodesales/kraken-blockchain-postgres-rest-wrapper
+    image: marcellodesales/kraken-the-btc-transactions/postgres-rest-wrapper
     logging: *kraken-platform-core-logging
     networks: *kraken-platform-core-networks
     container_name: bitcoin-transactions-postgres-data-service
@@ -84,6 +86,8 @@ services:
       interval: 3s
       timeout: 5s
       retries: 3
+
+    # https://github.com/peter-evans/docker-compose-healthcheck
     depends_on:
       postgres:
         condition: service_healthy
@@ -92,7 +96,7 @@ services:
   # Bitcoin Transactions reporter #
   #############
   transactions-data-watcher:
-    image: marcellodesales/kraken-blockchain-transactions-data-watcher
+    image: marcellodesales/kraken-the-btc-transactions/watcher
     container_name: bitcoin-transactions-data-watcher
     logging: *kraken-platform-core-logging
     networks: *kraken-platform-core-networks
@@ -113,6 +117,8 @@ services:
       TRANSACTIONS_WATCHER_DIR_TO_WATCH: /kraken/blockchain/bitcoin/listsinceblock/data
       TRANSACTIONS_WATCHER_FILE_EXTENSION: .json
       TRANSACTIONS_DATA_SERVICE_ADDRESS: http://bitcoin-transactions-postgres-data-service:3000
+    labels:
+      com.github.marcellodesales.type: runtime
     restart: "no"
     # https://stackoverflow.com/questions/42737957/how-to-view-docker-compose-healthcheck-logs/42738182#42738182
     # https://medium.com/geekculture/how-to-successfully-implement-a-healthcheck-in-docker-compose-efced60bc08e
@@ -122,6 +128,8 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+    # https://github.com/peter-evans/docker-compose-healthcheck
     depends_on:
       postgREST:
         condition: service_healthy
