@@ -66,22 +66,22 @@ KrakenTransactionsFileWatcher.prototype._saveHealthcheckFile = function _saveHea
 /**
  * Verifies if the given filename exists and prints the status.
  */
-KrakenTransactionsFileWatcher.prototype._checkTransactionFile = function _checkTransactionFile(fullFilePath) {
+KrakenTransactionsFileWatcher.prototype._checkTransactionFile = async function _checkTransactionFile(fullFilePath) {
     // when triggered from an event of new file
     if (fullFilePath && fullFilePath.endsWith(this.config.transactionsFileExtension)) {
-        var stat = fs.statSync(fullFilePath);
+        let stat = fs.statSync(fullFilePath);
         if (!stat.isFile() || stat.size == 0) {
             console.log("ERROR: the path '" + fullFilePath + "' is not a file or has no content!");
             throw new Error(`The path '${fullFilePath}' is not a file with contents...`);
         }
 
         // process the transactions for the fullpath
-        this.processTransaction(fullFilePath)
-        return
+        let bootstrapping = false;
+        return await this.processTransaction(fullFilePath, bootstrapping)
     }
 };
 
-KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = function _bootstrapCurrentWatchDir() {
+KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = async function _bootstrapCurrentWatchDir() {
     // This is triggered when the server bootstraps
     // https://stackoverflow.com/questions/25460574/find-files-by-extension-html-under-a-folder-in-nodejs/42734993#42734993
     let dir = fs.readdirSync(this.config.dirToWatch);
@@ -91,17 +91,21 @@ KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = function _bo
     });
 
     // For every file that exists during the bootstrap, process them
-    transactionFiles.forEach(transactionFileName => {
+    for (const transactionFileName of transactionFiles) {
         console.log(`Processing ${transactionFileName} at ${this.config.dirToWatch}`)
         const fullFilePath = `${this.config.dirToWatch}/${transactionFileName}`;
         try {
-            this.processTransaction(fullFilePath);
+            let bootstrapping = true;
+            const result = await this.processTransaction(fullFilePath, bootstrapping);
             this.filesPathsProcessed.push(fullFilePath);
 
         } catch (errorProcessingTransactionFile) {
             console.error(`Couldn't process transaction file on bootstrap: ${errorProcessingTransactionFile}`)
         }
-    });
+    }
+
+    // After it has bootstrapped, we can call
+    this.walletTransactionsAggregator.processWalletDepositsAggregations();
 };
 
 /**
@@ -112,7 +116,7 @@ KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = function _bo
  * @param {String} filename is the name of the string, without the directory path.
  * is created.
  */
-KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(eventType, filename) {
+KrakenTransactionsFileWatcher.prototype._onFileChange = async function onFileChange(eventType, filename) {
     console.log(`The following happened: ${eventType}`)
 
     // Skip if the event is during the creation (rename and change) and if the name is NOT needed.
@@ -133,7 +137,7 @@ KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(ev
     }
 
     // Check the configuration if the event was a rename or creation of the filename
-    this._checkTransactionFile(potentialFilePath);
+    await this._checkTransactionFile(potentialFilePath);
 };
 
 /**
@@ -143,32 +147,40 @@ KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(ev
  * fired twice when the file.
  * @param {String} filename is the name of the string, without the directory path.
  */
-KrakenTransactionsFileWatcher.prototype.processTransaction = function processTransaction(filePath) {
+KrakenTransactionsFileWatcher.prototype.processTransaction = async function processTransaction(filePath, bootstrapping) {
     console.log(`The transaction file=${filePath} will be parsed...`);
 
-    this.transactionsParser.parse(filePath).then((parsedValidDepositsByWallets) => {
+    let parsedValidDepositsByWallets = null;
+    try {
+        parsedValidDepositsByWallets = await this.transactionsParser.parse(filePath);
+
+    } catch (errorParsingTransactions) {
+        console.error(`Error parsing transaction files: ${errorParsingTransactions}`);
+        return;
+    }
+
+    try {
         // // Bulk upsert all the wallet addresses before saving the transactions
-        this.transactionsDataRecorder.saveWalletAddresses(parsedValidDepositsByWallets).then((bulkSaveResult) => {
-            console.log(`Saved ${bulkSaveResult.data.length} wallet addresses from datafile '${filePath}'`);
+        const bulkSaveResult = await this.transactionsDataRecorder.saveWalletAddresses(parsedValidDepositsByWallets);
+        console.log(`Saved ${bulkSaveResult.data.length} wallet addresses from datafile '${filePath}'`);
 
-            // // Now, bulk upsert all the transactions from all wallets
-            this.transactionsDataRecorder.saveWalletTransactions(parsedValidDepositsByWallets).then((bulkTransactionsResult) => {
-                console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`);
+    } catch (errorSavingWallets) {
+        console.error(`Error saving the wallets: ${errorSavingWallets}`);
+    }
 
-                // Aggregate the values based on the current state
-                this.walletTransactionsAggregator.processWalletDepositsAggregations();
+    try {
+        // // Now, bulk upsert all the transactions from all wallets
+        const bulkTransactionsResult = await this.transactionsDataRecorder.saveWalletTransactions(parsedValidDepositsByWallets);
+        console.log(`Saved ${bulkTransactionsResult.data.length} wallet transactions from datafile '${filePath}'!`);
 
-            }).catch((errorWhileSavingTransactions) => {
-                console.error(`Couldn't save wallets transactions: ${errorWhileSavingTransactions}`)
-            });
+    } catch (errorWhileSavingTransactions) {
+        console.error(`Couldn't save wallets transactions: ${errorWhileSavingTransactions}`);
+    }
 
-        }).catch((errorSavingWallets) => {
-            console.error(`Error saving the wallets: ${errorSavingWallets}`)
-        })
-
-    }).catch((errorParsingTransactions) => {
-        console.error(`Error parsing transaction files: ${errorParsingTransactions}`)
-    })
+    if (!bootstrapping) {
+        // Aggregate the values based on the current state
+        this.walletTransactionsAggregator.processWalletDepositsAggregations();
+    }
 };
 
 /**

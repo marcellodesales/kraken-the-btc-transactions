@@ -72,7 +72,7 @@ function KrakenValidDepositsByAddressParser({config}) {
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenValidDepositsByAddressParser.prototype.parse = function parse(transactionsDataFilePath) {
+KrakenValidDepositsByAddressParser.prototype.parse = async function parse(transactionsDataFilePath) {
     return new Promise((resolve, reject)  => {
         const options = {}
         console.log(`Parsing transactions filePath '${transactionsDataFilePath}' with 
@@ -80,7 +80,7 @@ KrakenValidDepositsByAddressParser.prototype.parse = function parse(transactions
 
         // Parse the json file with the jq filter https://github.com/sanack/node-jq#node-jq-equivalent
         jq.run(this.allValidDepositsJqFilter, transactionsDataFilePath, options).then((transactionsByAddressJson) => {
-            console.log(`Transactions by wallet address: ${transactionsByAddressJson}`);
+            console.log(`Successfully filtered transactions...`);
             const transactionsByAddressObject = JSON.parse(transactionsByAddressJson)
             resolve(transactionsByAddressObject);
 

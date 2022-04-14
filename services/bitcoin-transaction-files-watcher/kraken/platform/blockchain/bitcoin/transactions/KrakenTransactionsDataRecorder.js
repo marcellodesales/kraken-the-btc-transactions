@@ -52,7 +52,7 @@ KrakenTransactionsDataRecorder.prototype.saveWalletAddresses = function saveWall
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenTransactionsDataRecorder.prototype.saveWalletTransactions = function saveWalletTransactions(walletsDepositsList) {
+KrakenTransactionsDataRecorder.prototype.saveWalletTransactions = async function saveWalletTransactions(walletsDepositsList) {
     console.log("Upsert bulk collection of transactions by wallets");
 
     let all_transactions = [];

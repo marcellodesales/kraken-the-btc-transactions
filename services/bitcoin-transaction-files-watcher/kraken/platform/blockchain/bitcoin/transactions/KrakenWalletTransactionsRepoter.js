@@ -118,6 +118,7 @@ KrakenWalletTransactionsRepoter.prototype._formatReport = function formatReport(
     return transactionsSummary;
 };
 
+// https://stackoverflow.com/questions/18719775/parsing-and-converting-exponential-values-to-decimal-in-javascript/18719988#18719988
 Number.prototype.noExponents = function() {
     var data = String(this).split(/[eE]/);
     if (data.length == 1) return data[0];
