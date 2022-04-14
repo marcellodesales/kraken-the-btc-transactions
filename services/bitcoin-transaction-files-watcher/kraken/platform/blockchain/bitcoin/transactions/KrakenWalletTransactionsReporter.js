@@ -5,7 +5,7 @@
  * Written by Marcello DeSales <marcello.desales@gmail.com>, April 2022.
  */
 
-module.exports = KrakenWalletTransactionsRepoter;
+module.exports = KrakenWalletTransactionsReporter;
 
 /**
  * Fetches the current transactions and produces aggregated values based on the list of wallets.
@@ -13,8 +13,8 @@ module.exports = KrakenWalletTransactionsRepoter;
  * @param config
  * @constructor
  */
-function KrakenWalletTransactionsRepoter({config, postgrestServiceClient}) {
-    console.log("🎤 WalletsTransactionsReporter Initializing KrakenWalletTransactionsRepoter component...");
+function KrakenWalletTransactionsReporter({config, postgrestServiceClient}) {
+    console.log("🎤 WalletsTransactionsReporter Initializing KrakenWalletTransactionsReporter component...");
 
     // the config to load
     this.config = config;
@@ -27,7 +27,7 @@ function KrakenWalletTransactionsRepoter({config, postgrestServiceClient}) {
  * Saves the healthcheck file for container healthcheck
  * @private
  */
-KrakenWalletTransactionsRepoter.prototype.processWalletDepositsAggregations = function processWalletDepositsAggregations() {
+KrakenWalletTransactionsReporter.prototype.processWalletDepositsAggregations = function processWalletDepositsAggregations() {
     console.log("Fetch current wallet transactions aggregated values");
 
     const formatter = this._formatReport
@@ -68,7 +68,7 @@ KrakenWalletTransactionsRepoter.prototype.processWalletDepositsAggregations = fu
  * @returns {{min: {instances: *[], report: *[]}, max: {instances: *[], report: *[]}, unknownUsers: {instances: *[], report: *[]}, knownUsers: {instances: *[], report: *[]}}}
  * @private
  */
-KrakenWalletTransactionsRepoter.prototype._formatReport = function formatReport(depositsSummary) {
+KrakenWalletTransactionsReporter.prototype._formatReport = function formatReport(depositsSummary) {
     let transactionsSummary = {
         knownUsers: {
             instances: [],

@@ -50,7 +50,7 @@ function KrakenTransactionsFileWatcher({config, transactionsParser, transactions
     this._saveHealthcheckFile();
 
     // Bootstap the watch dir as it might contain files
-    this._bootstrapCurrentWatchDir()
+    this._bootstrapCurrentWatchDir();
 };
 
 /**
@@ -125,7 +125,7 @@ KrakenTransactionsFileWatcher.prototype._bootstrapCurrentWatchDir = async functi
  * @param {String} filename is the name of the string, without the directory path.
  * is created.
  */
-KrakenTransactionsFileWatcher.prototype._onFileChange = async function onFileChange(eventType, filename) {
+KrakenTransactionsFileWatcher.prototype._onFileChange = function onFileChange(eventType, filename) {
     console.log(`The following happened: ${eventType}`)
 
     // Skip if the event is during the creation (rename and change) and if the name is NOT needed.
@@ -146,7 +146,9 @@ KrakenTransactionsFileWatcher.prototype._onFileChange = async function onFileCha
     }
 
     // Check the configuration if the event was a rename or creation of the filename
-    await this._checkTransactionFile(potentialFilePath);
+    this._checkTransactionFile(potentialFilePath).then(() => {
+        console.log(`Finished processing transaction from '${potentialFilePath}'.`)
+    });
 };
 
 /**

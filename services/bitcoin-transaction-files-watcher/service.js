@@ -77,7 +77,7 @@ postgrestClient.shouldThrowOnError = true;
 const KrakenTransactionsFileWatcher = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsFileWatcher")
 const KrakenValidDepositsByAddressParser = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenValidDepositsByAddressParser")
 const KrakenTransactionsDataRecorder = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenTransactionsDataRecorder")
-const KrakenWalletTransactionsRepoter = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsRepoter")
+const KrakenWalletTransactionsReporter = require("./kraken/platform/blockchain/bitcoin/transactions/KrakenWalletTransactionsReporter")
 
 // Provide the file transactions watcher
 new KrakenTransactionsFileWatcher({
@@ -85,6 +85,6 @@ new KrakenTransactionsFileWatcher({
     transactionsParser: new KrakenValidDepositsByAddressParser({config: configInstance}),
     transactionsDataRecorder:  new KrakenTransactionsDataRecorder({config: configInstance,
         postgrestServiceClient: postgrestClient}),
-    walletTransactionsAggregator:  new KrakenWalletTransactionsRepoter({config: configInstance,
+    walletTransactionsAggregator:  new KrakenWalletTransactionsReporter({config: configInstance,
         postgrestServiceClient: postgrestClient})
 });
