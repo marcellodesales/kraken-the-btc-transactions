@@ -62,7 +62,8 @@ class KrakenTransactionsFileWatcher {
         fs.statSync(this.config.dirToWatch);
 
         // persistent true as we need the process to be running in the background
-        fs.watch(this.config.dirToWatch, {persistent: true}, this.onFileChange);
+        // https://javascript.info/bind
+        fs.watch(this.config.dirToWatch, {persistent: true}, this.onFileChange.bind(this));
 
         // Just save the healthcheck before it starts bootstrap the reading the files
         this._saveHealthcheckFile();
@@ -149,7 +150,7 @@ class KrakenTransactionsFileWatcher {
      * @param {String} filename is the name of the string, without the directory path is created.
      */
     onFileChange = function(eventType, filename) {
-        console.log(`The following happened: ${eventType}`)
+        console.log(`INFO: Async file-system event triggered: eventType=${eventType}, filename=${filename}`);
 
         // Skip if the event is during the creation (rename and change) and if the name is NOT needed.
         if (!filename.endsWith(this.config.transactionsFileExtension)) {
