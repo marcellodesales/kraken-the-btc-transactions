@@ -52,7 +52,7 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
 # 👽 TransactionsDataService
 
 > Exposes APIs to update the database using CRUD operators.
-> Implemented using postgREST.
+> Implemented using [postgREST](https://github.com/mattddowney/compose-postgrest#architecture)
 > * **NOTE**: (v1) of this solution won't include the endpoints
 
 * `/users`: manages the users and their associated wallets
@@ -75,6 +75,8 @@ Based on the Functional and Non-functional [[Requirements-Analysis]], I'd like t
   * Results are produced in the data source instead of automating data processing
   * We can compute the final report properly when retrieving the data. 
   * Produces the same result of https://jqplay.org/s/weXDSQzPAo
+
+> **REF**: https://stackoverflow.com/questions/406294/left-join-vs-left-outer-join-in-sql-server/406333#406333
   
 # 🎤 WalletsTransactionsReporter
 
