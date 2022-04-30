@@ -1,6 +1,6 @@
-# Kraken Crypto/Payments Hiring Test
+# Mesh The Bitcoin Transactions
 
-At Kraken, we receive thousands of deposits from customers per day. This test is designed to test your ability to work with a transaction set that could get returned by a blockchain daemon like bitcoind.
+At Mesh, we receive thousands of deposits from customers per day. This test is designed to test your ability to work with a transaction set that could get returned by a blockchain daemon like bitcoind.
 
 The data we work with in this scenario comes from bitcoind’s rpc call `listsinceblock`. A frequently used approach to detect incoming deposits is to periodically call `listsinceblock` and process the returned data. This test contains 2 json files that represent the data from 2 separate calls to this endpoint. Your task is to write code that processes those files and detects all valid incoming deposits.
 
@@ -27,7 +27,7 @@ If you're not comfortable with Node.js, feel free to use the language of your ch
 
 The command `docker-compose up` **MUST**:
 
-1. Read all transactions from [./services/bitcoin-transaction-files-watcher/data/transactions-1.json](https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-1.json) and [./services/bitcoin-transaction-files-watcher/data/transactions-2.json](https://github.com/marcellodesales/kraken-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-2.json) and store all deposits in a database of your choice.
+1. Read all transactions from [./services/bitcoin-transaction-files-watcher/data/transactions-1.json](https://github.com/marcellodesales/mesh-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-1.json) and [./services/bitcoin-transaction-files-watcher/data/transactions-2.json](https://github.com/marcellodesales/mesh-the-btc-transactions/blob/master/services/bitcoin-transaction-files-watcher/data/transactions-2.json) and store all deposits in a database of your choice.
 2. Read deposits from the database that are good to credit to users and print the following 10 lines on stdout:
 
     ```
